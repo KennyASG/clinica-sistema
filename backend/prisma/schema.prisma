@@ -1,6 +1,13 @@
 // Prisma Schema — Sistema de Gestión Clínica Médica
-// Convertir desde: database/clinica_db_creation.sql
-// El schema completo se define en la tarea "Trasladar schema SQL a Prisma"
+// Convertido desde: database/clinica_db_creation.sql (PostgreSQL 16)
+//
+// NOTAS DE CONVERSIÓN:
+//  - PKs: UUID con uuid_generate_v4() (requiere extensión uuid-ossp en BD)
+//  - Índice parcial RN-01 (no doble booking) no se puede declarar en Prisma;
+//    se aplica via migración SQL manual: idx_cita_no_overlap
+//  - Triggers (fn_sync_flag_alergias, fn_validar_rol_medico, etc.) van en migración SQL
+//  - Vistas (v_agenda_dia, v_expediente_emergencia, v_historial_consultas) van en migración SQL
+//  - Búsqueda difusa pg_trgm: índice gin en migración SQL
 
 generator client {
   provider = "prisma-client-js"
@@ -13,162 +20,317 @@ datasource db {
 
 // ─── Enums ────────────────────────────────────────────────────────────────────
 
-enum Rol {
+enum RolUsuario {
   administrador
   medico
   enfermera
   secretaria
+
+  @@map("rol_usuario")
+}
+
+enum SexoPaciente {
+  masculino
+  femenino
+  otro
+
+  @@map("sexo_paciente")
+}
+
+enum TipoSangre {
+  A_POS  @map("A+")
+  A_NEG  @map("A-")
+  B_POS  @map("B+")
+  B_NEG  @map("B-")
+  AB_POS @map("AB+")
+  AB_NEG @map("AB-")
+  O_POS  @map("O+")
+  O_NEG  @map("O-")
+  desconocido
+
+  @@map("tipo_sangre")
 }
 
 enum EstadoCita {
   pendiente
   confirmada
+  en_atencion
   atendida
   cancelada
-  no_asistio
+  no_presentada
+
+  @@map("estado_cita")
 }
 
-// ─── Modelos ──────────────────────────────────────────────────────────────────
+enum DiaSemana {
+  lunes
+  martes
+  miercoles
+  jueves
+  viernes
+  sabado
+  domingo
+
+  @@map("dia_semana")
+}
+
+// ─── Catálogos ────────────────────────────────────────────────────────────────
+
+model Especialidad {
+  id          String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  nombre      String   @unique @db.VarChar(100)
+  descripcion String?
+  activo      Boolean  @default(true)
+  creadoEn    DateTime @default(now()) @map("creado_en")
+
+  medicosEspecialidad MedicoEspecialidad[]
+
+  @@map("especialidad")
+}
+
+model TipoConsulta {
+  id               String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  nombre           String   @unique @db.VarChar(80)
+  descripcion      String?
+  duracionMinutos  Int      @default(30) @map("duracion_minutos")
+  activo           Boolean  @default(true)
+  creadoEn         DateTime @default(now()) @map("creado_en")
+
+  citas            Cita[]
+
+  @@map("tipo_consulta")
+}
+
+// ─── Usuarios ─────────────────────────────────────────────────────────────────
 
 model Usuario {
-  id           Int       @id @default(autoincrement())
-  nombre       String    @db.VarChar(100)
-  email        String    @unique @db.VarChar(150)
-  passwordHash String    @map("password_hash") @db.VarChar(255)
-  rol          Rol
-  activo       Boolean   @default(true)
-  creadoEn     DateTime  @default(now()) @map("creado_en")
+  id                String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  nombreCompleto    String      @map("nombre_completo") @db.VarChar(200)
+  email             String      @unique @db.VarChar(150)
+  passwordHash      String      @map("password_hash") @db.VarChar(255)
+  rol               RolUsuario
+  numeroColegiado   String?     @map("numero_colegiado") @db.VarChar(20)
+  telefono          String?     @db.VarChar(20)
+  activo            Boolean     @default(true)
+  intentosFallidos  Int         @default(0) @map("intentos_fallidos")
+  bloqueadoHasta    DateTime?   @map("bloqueado_hasta")
+  creadoEn          DateTime    @default(now()) @map("creado_en")
+  ultimoAcceso      DateTime?   @map("ultimo_acceso")
+  creadoPorId       String?     @map("creado_por") @db.Uuid
 
-  consultas    Consulta[]
-  signosVitales SignosVitales[]
-  citas        Cita[]         @relation("CitasMedico")
-  auditorias   Auditoria[]
+  creadoPor         Usuario?    @relation("UsuarioCreadoPor", fields: [creadoPorId], references: [id])
+  usuariosCreados   Usuario[]   @relation("UsuarioCreadoPor")
 
-  @@map("usuarios")
+  especialidades    MedicoEspecialidad[]
+  horarios          HorarioMedico[]
+  pacientesCreados  Paciente[]
+  expedientesCreados  Expediente[]  @relation("ExpedienteCreador")
+  expedientesActualizados Expediente[] @relation("ExpedienteActualizador")
+  documentosSubidos DocumentoAdjunto[]
+  citasMedico       Cita[]       @relation("CitasMedico")
+  citasCreadas      Cita[]       @relation("CitasCreador")
+  citasCanceladas   Cita[]       @relation("CitasCanceladas")
+  signosVitales     SignosVitales[]
+  consultas         Consulta[]
+  auditorias        Auditoria[]
+
+  @@map("usuario")
 }
 
+model MedicoEspecialidad {
+  medicoId       String       @map("medico_id") @db.Uuid
+  especialidadId String       @map("especialidad_id") @db.Uuid
+  esPrincipal    Boolean      @default(false) @map("es_principal")
+  asignadoEn     DateTime     @default(now()) @map("asignado_en")
+
+  medico         Usuario      @relation(fields: [medicoId], references: [id])
+  especialidad   Especialidad @relation(fields: [especialidadId], references: [id])
+
+  @@id([medicoId, especialidadId])
+  @@map("medico_especialidad")
+}
+
+model HorarioMedico {
+  id               String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  medicoId         String    @map("medico_id") @db.Uuid
+  dia              DiaSemana
+  horaInicio       DateTime  @map("hora_inicio") @db.Time
+  horaFin          DateTime  @map("hora_fin") @db.Time
+  duracionCitaMin  Int       @default(30) @map("duracion_cita_min")
+  activo           Boolean   @default(true)
+
+  medico           Usuario   @relation(fields: [medicoId], references: [id])
+
+  @@unique([medicoId, dia])
+  @@map("horario_medico")
+}
+
+// ─── Pacientes y Expedientes ──────────────────────────────────────────────────
+
 model Paciente {
-  id            Int        @id @default(autoincrement())
-  dpi           String     @unique @db.VarChar(20)
-  nombre        String     @db.VarChar(100)
-  apellido      String     @db.VarChar(100)
-  fechaNacimiento DateTime @map("fecha_nacimiento") @db.Date
-  telefono      String?    @db.VarChar(20)
-  email         String?    @db.VarChar(150)
-  direccion     String?
-  activo        Boolean    @default(true)
-  creadoEn      DateTime   @default(now()) @map("creado_en")
+  id                   String       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  nombreCompleto       String       @map("nombre_completo") @db.VarChar(200)
+  dpi                  String       @unique @db.VarChar(15)
+  fechaNacimiento      DateTime     @map("fecha_nacimiento") @db.Date
+  sexo                 SexoPaciente
+  telefono             String       @db.VarChar(20)
+  telefonoEmergencia   String?      @map("telefono_emergencia") @db.VarChar(20)
+  contactoEmergencia   String?      @map("contacto_emergencia") @db.VarChar(200)
+  direccion            String?
+  correo               String?      @db.VarChar(150)
+  seguroMedico         String?      @map("seguro_medico") @db.VarChar(100)
+  numeroPoliza         String?      @map("numero_poliza") @db.VarChar(50)
+  activo               Boolean      @default(true)
+  creadoEn             DateTime     @default(now()) @map("creado_en")
+  creadoPorId          String       @map("creado_por") @db.Uuid
 
-  expediente    Expediente?
-  citas         Cita[]
+  creadoPor            Usuario      @relation(fields: [creadoPorId], references: [id])
+  expediente           Expediente?
+  citas                Cita[]
 
-  @@map("pacientes")
+  @@map("paciente")
 }
 
 model Expediente {
-  id              Int       @id @default(autoincrement())
-  pacienteId      Int       @unique @map("paciente_id")
-  tieneAlergias   Boolean   @default(false) @map("tiene_alergias")
-  activo          Boolean   @default(true)
-  creadoEn        DateTime  @default(now()) @map("creado_en")
+  id                      String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  pacienteId              String    @unique @map("paciente_id") @db.Uuid
+  tipoSangre              TipoSangre @default(desconocido) @map("tipo_sangre")
+  alergias                String?
+  tieneAlergias           Boolean   @default(false) @map("tiene_alergias")
+  enfermedadesCronicas    String?   @map("enfermedades_cronicas")
+  medicamentosPermanentes String?   @map("medicamentos_permanentes")
+  antecedentesFamiliares  String?   @map("antecedentes_familiares")
+  antecedentesQuirurgicos String?   @map("antecedentes_quirurgicos")
+  antecedentesTraumaticos String?   @map("antecedentes_traumaticos")
+  observacionesGenerales  String?   @map("observaciones_generales")
+  activo                  Boolean   @default(true)
+  creadoEn                DateTime  @default(now()) @map("creado_en")
+  actualizadoEn           DateTime  @default(now()) @updatedAt @map("actualizado_en")
+  creadoPorId             String    @map("creado_por") @db.Uuid
+  actualizadoPorId        String?   @map("actualizado_por") @db.Uuid
 
-  paciente        Paciente  @relation(fields: [pacienteId], references: [id])
-  consultas       Consulta[]
-  signosVitales   SignosVitales[]
-  alergias        Alergia[]
-  documentos      Documento[]
+  paciente                Paciente  @relation(fields: [pacienteId], references: [id])
+  creadoPor               Usuario   @relation("ExpedienteCreador", fields: [creadoPorId], references: [id])
+  actualizadoPor          Usuario?  @relation("ExpedienteActualizador", fields: [actualizadoPorId], references: [id])
+  consultas               Consulta[]
+  documentos              DocumentoAdjunto[]
 
-  @@map("expedientes")
+  @@map("expediente")
 }
 
-model Consulta {
-  id           Int        @id @default(autoincrement())
-  expedienteId Int        @map("expediente_id")
-  medicoId     Int        @map("medico_id")
-  motivoConsulta String   @map("motivo_consulta")
-  diagnostico  String?
-  codigoCie10  String?    @map("codigo_cie10") @db.VarChar(10)
-  tratamiento  String?
-  creadoEn     DateTime   @default(now()) @map("creado_en")
+model DocumentoAdjunto {
+  id            String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  expedienteId  String   @map("expediente_id") @db.Uuid
+  nombreArchivo String   @map("nombre_archivo") @db.VarChar(255)
+  descripcion   String?  @db.VarChar(255)
+  urlStorage    String   @map("url_storage")
+  tipoMime      String   @map("tipo_mime") @db.VarChar(100)
+  tamanoBytes   Int      @map("tamano_bytes")
+  subidoEn      DateTime @default(now()) @map("subido_en")
+  subidoPorId   String   @map("subido_por") @db.Uuid
 
-  expediente   Expediente @relation(fields: [expedienteId], references: [id])
-  medico       Usuario    @relation(fields: [medicoId], references: [id])
+  expediente    Expediente @relation(fields: [expedienteId], references: [id])
+  subidoPor     Usuario    @relation(fields: [subidoPorId], references: [id])
 
-  @@map("consultas")
+  @@map("documento_adjunto")
 }
 
-model SignosVitales {
-  id              Int        @id @default(autoincrement())
-  expedienteId    Int        @map("expediente_id")
-  registradoPorId Int        @map("registrado_por_id")
-  presionArterial String?    @map("presion_arterial") @db.VarChar(20)
-  frecuenciaCardiaca Int?    @map("frecuencia_cardiaca")
-  temperatura     Decimal?   @db.Decimal(4, 1)
-  peso            Decimal?   @db.Decimal(5, 2)
-  talla           Decimal?   @db.Decimal(4, 1)
-  saturacionO2    Int?       @map("saturacion_o2")
-  creadoEn        DateTime   @default(now()) @map("creado_en")
-
-  expediente      Expediente @relation(fields: [expedienteId], references: [id])
-  registradoPor   Usuario    @relation(fields: [registradoPorId], references: [id])
-
-  @@map("signos_vitales")
-}
-
-model Alergia {
-  id           Int        @id @default(autoincrement())
-  expedienteId Int        @map("expediente_id")
-  descripcion  String
-  severidad    String?    @db.VarChar(20)
-
-  expediente   Expediente @relation(fields: [expedienteId], references: [id])
-
-  @@map("alergias")
-}
+// ─── Citas y Consultas ────────────────────────────────────────────────────────
 
 model Cita {
-  id                Int        @id @default(autoincrement())
-  pacienteId        Int        @map("paciente_id")
-  medicoId          Int        @map("medico_id")
+  id                String     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  pacienteId        String     @map("paciente_id") @db.Uuid
+  medicoId          String     @map("medico_id") @db.Uuid
+  tipoConsultaId    String     @map("tipo_consulta_id") @db.Uuid
   fechaHoraInicio   DateTime   @map("fecha_hora_inicio")
   fechaHoraFin      DateTime   @map("fecha_hora_fin")
   estado            EstadoCita @default(pendiente)
   motivoCancelacion String?    @map("motivo_cancelacion")
-  notas             String?
+  canceladoPorId    String?    @map("cancelado_por") @db.Uuid
+  canceladoEn       DateTime?  @map("cancelado_en")
+  notasSecretaria   String?    @map("notas_secretaria")
   creadoEn          DateTime   @default(now()) @map("creado_en")
+  creadoPorId       String     @map("creado_por") @db.Uuid
 
-  paciente          Paciente   @relation(fields: [pacienteId], references: [id])
-  medico            Usuario    @relation("CitasMedico", fields: [medicoId], references: [id])
+  paciente          Paciente     @relation(fields: [pacienteId], references: [id])
+  medico            Usuario      @relation("CitasMedico", fields: [medicoId], references: [id])
+  tipoConsulta      TipoConsulta @relation(fields: [tipoConsultaId], references: [id])
+  canceladoPor      Usuario?     @relation("CitasCanceladas", fields: [canceladoPorId], references: [id])
+  creadoPor         Usuario      @relation("CitasCreador", fields: [creadoPorId], references: [id])
+  signosVitales     SignosVitales?
+  consulta          Consulta?
 
-  @@map("citas")
+  // NOTA: el índice parcial para RN-01 (no doble booking) se aplica
+  // en migración SQL: CREATE UNIQUE INDEX idx_cita_no_overlap ON cita (medico_id, fecha_hora_inicio)
+  //                   WHERE estado NOT IN ('cancelada', 'no_presentada');
+  @@index([medicoId, fechaHoraInicio])
+  @@index([pacienteId])
+  @@index([estado])
+  @@map("cita")
 }
 
-model Documento {
-  id           Int        @id @default(autoincrement())
-  expedienteId Int        @map("expediente_id")
-  nombre       String     @db.VarChar(255)
-  urlSpaces    String     @map("url_spaces")
-  tipoMime     String?    @map("tipo_mime") @db.VarChar(100)
-  tamanoBytes  Int?       @map("tamano_bytes")
-  creadoEn     DateTime   @default(now()) @map("creado_en")
+model SignosVitales {
+  id                 String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  citaId             String   @unique @map("cita_id") @db.Uuid
+  enfermeraId        String   @map("enfermera_id") @db.Uuid
+  presionArterial    String?  @map("presion_arterial") @db.VarChar(10)
+  temperaturaC       Decimal? @map("temperatura_c") @db.Decimal(4, 1)
+  pesoKg             Decimal? @map("peso_kg") @db.Decimal(5, 2)
+  tallaCm            Decimal? @map("talla_cm") @db.Decimal(5, 1)
+  frecuenciaCardiaca Int?     @map("frecuencia_cardiaca")
+  saturacionO2       Int?     @map("saturacion_o2")
+  glucosaMgdl        Int?     @map("glucosa_mgdl")
+  observaciones      String?
+  registradoEn       DateTime @default(now()) @map("registrado_en")
 
-  expediente   Expediente @relation(fields: [expedienteId], references: [id])
+  cita               Cita    @relation(fields: [citaId], references: [id])
+  enfermera          Usuario @relation(fields: [enfermeraId], references: [id])
 
-  @@map("documentos")
+  @@map("signos_vitales")
 }
+
+model Consulta {
+  id                     String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  expedienteId           String   @map("expediente_id") @db.Uuid
+  citaId                 String?  @unique @map("cita_id") @db.Uuid
+  medicoId               String   @map("medico_id") @db.Uuid
+  fechaHora              DateTime @default(now()) @map("fecha_hora")
+  motivoConsulta         String   @map("motivo_consulta")
+  diagnosticoCie10       String?  @map("diagnostico_cie10") @db.VarChar(10)
+  diagnosticoDescripcion String?  @map("diagnostico_descripcion")
+  tratamiento            String?
+  medicamentosRecetados  String?  @map("medicamentos_recetados")
+  indicacionesGenerales  String?  @map("indicaciones_generales")
+  proximaCitaDias        Int?     @map("proxima_cita_dias")
+  esEmergencia           Boolean  @default(false) @map("es_emergencia")
+  creadoEn               DateTime @default(now()) @map("creado_en")
+
+  expediente             Expediente @relation(fields: [expedienteId], references: [id])
+  cita                   Cita?      @relation(fields: [citaId], references: [id])
+  medico                 Usuario    @relation(fields: [medicoId], references: [id])
+
+  @@index([expedienteId, fechaHora(sort: Desc)])
+  @@index([medicoId, fechaHora(sort: Desc)])
+  @@map("consulta")
+}
+
+// ─── Auditoría ────────────────────────────────────────────────────────────────
 
 model Auditoria {
-  id          Int      @id @default(autoincrement())
-  usuarioId   Int?     @map("usuario_id")
-  accion      String   @db.VarChar(100)
-  tabla       String?  @db.VarChar(50)
-  registroId  Int?     @map("registro_id")
-  datosAntes  Json?    @map("datos_antes")
-  datosDespues Json?   @map("datos_despues")
-  ip          String?  @db.VarChar(45)
-  creadoEn    DateTime @default(now()) @map("creado_en")
+  id               String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  usuarioId        String   @map("usuario_id") @db.Uuid
+  accion           String   @db.VarChar(20)
+  tablaAfectada    String   @map("tabla_afectada") @db.VarChar(50)
+  registroId       String?  @map("registro_id") @db.Uuid
+  datosAnteriores  Json?    @map("datos_anteriores")
+  datosNuevos      Json?    @map("datos_nuevos")
+  ipAddress        String?  @map("ip_address") @db.VarChar(45)
+  userAgent        String?  @map("user_agent")
+  fechaHora        DateTime @default(now()) @map("fecha_hora")
 
-  usuario     Usuario? @relation(fields: [usuarioId], references: [id])
+  usuario          Usuario  @relation(fields: [usuarioId], references: [id])
 
+  @@index([usuarioId, fechaHora(sort: Desc)])
+  @@index([tablaAfectada, fechaHora(sort: Desc)])
   @@map("auditoria")
 }
