@@ -49,29 +49,29 @@
 > Semanas 7-10 | Meta: el expediente digital funciona completo.
 
 ### Backend
-- [ ] **RF-07** — `POST /api/pacientes` — Crear paciente con validación de DPI único
-- [ ] **RF-09** — `GET /api/pacientes?q=` — Búsqueda difusa por nombre o DPI (pg_trgm)
-- [ ] **RF-08** — `POST /api/expedientes` — Crear expediente médico base
-- [ ] **RF-15** — Flag `tiene_alergias` se sincroniza via trigger al actualizar alergias
-- [ ] **RF-14** — `GET /api/expedientes/:id/historial` — Historial ordenado más reciente primero
-- [ ] **RF-10** — `POST /api/consultas` — Registrar nota médica (solo rol médico — RN-02)
-- [ ] **RF-11** — `POST /api/signos-vitales` — Registrar signos vitales (enfermera/médico)
-- [ ] **RF-12** — Expedientes no se eliminan — solo `PATCH activo: false` (RN-03)
+- [x] **RF-07** — `POST /api/pacientes` — Crear paciente con validación de DPI único
+- [x] **RF-09** — `GET /api/pacientes?q=` — Búsqueda difusa por nombre o DPI (pg_trgm)
+- [x] **RF-08** — `POST /api/expedientes` — Crear expediente médico base
+- [x] **RF-15** — Flag `tiene_alergias` se sincroniza via trigger al actualizar alergias
+- [x] **RF-14** — `GET /api/expedientes/:id/historial` — Historial ordenado más reciente primero
+- [x] **RF-10** — `POST /api/consultas` — Registrar nota médica (solo rol médico — RN-02)
+- [x] **RF-11** — `POST /api/signos-vitales` — Registrar signos vitales (enfermera/médico)
+- [x] **RF-12** — Expedientes no se eliminan — solo `PATCH activo: false` (RN-03)
 - [ ] **RF-13** — `POST /api/documentos` — Subir archivo adjunto a DO Spaces (max 10MB)
-- [ ] **RN-06** — Todo PATCH/POST a expediente genera registro en `auditoria`
+- [x] **RN-06** — Todo PATCH/POST a expediente genera registro en `auditoria`
 
 ### Frontend web
-- [ ] **Pantalla búsqueda de pacientes** — Searchbar con resultados en tiempo real
-- [ ] **Pantalla crear paciente** — Formulario completo con validación
-- [ ] **Pantalla expediente** — Alerta roja de alergias, datos base, historial de consultas
-- [ ] **Modal nueva consulta (médico)** — Campos: motivo, diagnóstico CIE-10, tratamiento
-- [ ] **Formulario signos vitales (enfermera)** — Previo a cada consulta
+- [x] **Pantalla búsqueda de pacientes** — Searchbar con resultados en tiempo real
+- [x] **Pantalla crear paciente** — Formulario completo con validación
+- [x] **Pantalla expediente** — Alerta roja de alergias, datos base, historial de consultas
+- [x] **Modal nueva consulta (médico)** — Campos: motivo, diagnóstico CIE-10, tratamiento
+- [x] **Formulario signos vitales (enfermera)** — Previo a cada consulta
 
 ### Pruebas Sprint 3-4
-- [ ] Prueba: búsqueda "garcia" encuentra "García López" (búsqueda difusa)
-- [ ] Prueba: alerta de alergia aparece al abrir expediente con alergias registradas
-- [ ] Prueba: enfermera no puede hacer POST a /api/consultas (403)
-- [ ] Prueba: DELETE a expediente retorna 405 Method Not Allowed
+- [x] Prueba: búsqueda "garcia" encuentra "García López" (búsqueda difusa)
+- [x] Prueba: alerta de alergia aparece al abrir expediente con alergias registradas
+- [x] Prueba: enfermera no puede hacer POST a /api/consultas (403)
+- [x] Prueba: DELETE a expediente retorna 405 Method Not Allowed
 
 ---
 
