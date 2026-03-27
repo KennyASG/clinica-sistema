@@ -26,16 +26,17 @@ async function buscar(req, res, next) {
       });
     } else {
       // Búsqueda difusa con pg_trgm — safe usando tagged template literal de Prisma
+      // unaccent normaliza tildes para que 'garcia' encuentre 'García'
       pacientes = await prisma.$queryRaw`
         SELECT id, nombre_completo AS "nombreCompleto", dpi, telefono,
                fecha_nacimiento AS "fechaNacimiento", sexo
         FROM paciente
         WHERE activo = true
           AND (
-            similarity(nombre_completo, ${q}) > 0.15
-            OR nombre_completo ILIKE ${'%' + q + '%'}
+            similarity(unaccent(lower(nombre_completo)), unaccent(lower(${q}))) > 0.15
+            OR unaccent(lower(nombre_completo)) LIKE unaccent(lower(${'%' + q + '%'}))
           )
-        ORDER BY similarity(nombre_completo, ${q}) DESC
+        ORDER BY similarity(unaccent(lower(nombre_completo)), unaccent(lower(${q}))) DESC
         LIMIT 20
       `;
     }
@@ -55,6 +56,8 @@ async function crear(req, res, next) {
       return res.status(422).json(errorResponse(parsed.error.issues[0].message, 'VALIDATION_ERROR'));
     }
     const datos = parsed.data;
+    // Prisma requiere Date object para campos @db.Date
+    datos.fechaNacimiento = new Date(datos.fechaNacimiento);
 
     const existe = await prisma.paciente.findUnique({ where: { dpi: datos.dpi } });
     if (existe) {
