@@ -1,0 +1,13 @@
+{
+  "name": "clinica-mobile",
+  "version": "1.0.0",
+  "main": "expo-router/entry",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
