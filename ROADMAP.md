@@ -11,13 +11,13 @@
 > Objetivo: Repositorio listo, estructura de carpetas, conexión a BD funcional.
 
 - [x] **Crear monorepo con estructura de carpetas** — `/backend`, `/frontend`, `/mobile`, `/database`, `/specs` ✅ 2026-03-27
-- [ ] **Configurar backend base** — Node.js + Express + Prisma + variables de entorno
+- [x] **Configurar backend base** — Node.js + Express + Prisma + variables de entorno ✅ 2026-03-27
 - [ ] **Trasladar schema SQL a Prisma** — Convertir `clinica_db_creation.sql` a `schema.prisma`
 - [ ] **Configurar frontend base** — React + Vite + Tailwind + React Router + React Query
 - [ ] **Configurar mobile base** — Expo + React Navigation + AsyncStorage
 - [x] **Configurar GitHub repo** — Branches `main` y `develop`, `.gitignore` por subcarpeta ✅ 2026-03-27
 - [ ] **Crear archivos de specs** — Copiar requerimientos y reglas de negocio a `/specs/`
-- [ ] **Configurar `.env.example`** — Todas las variables sin valores reales
+- [x] **Configurar `.env.example`** — Todas las variables sin valores reales ✅ 2026-03-27
 
 ---
 

@@ -1,0 +1,174 @@
+// Prisma Schema — Sistema de Gestión Clínica Médica
+// Convertir desde: database/clinica_db_creation.sql
+// El schema completo se define en la tarea "Trasladar schema SQL a Prisma"
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ────────────────────────────────────────────────────────────────────
+
+enum Rol {
+  administrador
+  medico
+  enfermera
+  secretaria
+}
+
+enum EstadoCita {
+  pendiente
+  confirmada
+  atendida
+  cancelada
+  no_asistio
+}
+
+// ─── Modelos ──────────────────────────────────────────────────────────────────
+
+model Usuario {
+  id           Int       @id @default(autoincrement())
+  nombre       String    @db.VarChar(100)
+  email        String    @unique @db.VarChar(150)
+  passwordHash String    @map("password_hash") @db.VarChar(255)
+  rol          Rol
+  activo       Boolean   @default(true)
+  creadoEn     DateTime  @default(now()) @map("creado_en")
+
+  consultas    Consulta[]
+  signosVitales SignosVitales[]
+  citas        Cita[]         @relation("CitasMedico")
+  auditorias   Auditoria[]
+
+  @@map("usuarios")
+}
+
+model Paciente {
+  id            Int        @id @default(autoincrement())
+  dpi           String     @unique @db.VarChar(20)
+  nombre        String     @db.VarChar(100)
+  apellido      String     @db.VarChar(100)
+  fechaNacimiento DateTime @map("fecha_nacimiento") @db.Date
+  telefono      String?    @db.VarChar(20)
+  email         String?    @db.VarChar(150)
+  direccion     String?
+  activo        Boolean    @default(true)
+  creadoEn      DateTime   @default(now()) @map("creado_en")
+
+  expediente    Expediente?
+  citas         Cita[]
+
+  @@map("pacientes")
+}
+
+model Expediente {
+  id              Int       @id @default(autoincrement())
+  pacienteId      Int       @unique @map("paciente_id")
+  tieneAlergias   Boolean   @default(false) @map("tiene_alergias")
+  activo          Boolean   @default(true)
+  creadoEn        DateTime  @default(now()) @map("creado_en")
+
+  paciente        Paciente  @relation(fields: [pacienteId], references: [id])
+  consultas       Consulta[]
+  signosVitales   SignosVitales[]
+  alergias        Alergia[]
+  documentos      Documento[]
+
+  @@map("expedientes")
+}
+
+model Consulta {
+  id           Int        @id @default(autoincrement())
+  expedienteId Int        @map("expediente_id")
+  medicoId     Int        @map("medico_id")
+  motivoConsulta String   @map("motivo_consulta")
+  diagnostico  String?
+  codigoCie10  String?    @map("codigo_cie10") @db.VarChar(10)
+  tratamiento  String?
+  creadoEn     DateTime   @default(now()) @map("creado_en")
+
+  expediente   Expediente @relation(fields: [expedienteId], references: [id])
+  medico       Usuario    @relation(fields: [medicoId], references: [id])
+
+  @@map("consultas")
+}
+
+model SignosVitales {
+  id              Int        @id @default(autoincrement())
+  expedienteId    Int        @map("expediente_id")
+  registradoPorId Int        @map("registrado_por_id")
+  presionArterial String?    @map("presion_arterial") @db.VarChar(20)
+  frecuenciaCardiaca Int?    @map("frecuencia_cardiaca")
+  temperatura     Decimal?   @db.Decimal(4, 1)
+  peso            Decimal?   @db.Decimal(5, 2)
+  talla           Decimal?   @db.Decimal(4, 1)
+  saturacionO2    Int?       @map("saturacion_o2")
+  creadoEn        DateTime   @default(now()) @map("creado_en")
+
+  expediente      Expediente @relation(fields: [expedienteId], references: [id])
+  registradoPor   Usuario    @relation(fields: [registradoPorId], references: [id])
+
+  @@map("signos_vitales")
+}
+
+model Alergia {
+  id           Int        @id @default(autoincrement())
+  expedienteId Int        @map("expediente_id")
+  descripcion  String
+  severidad    String?    @db.VarChar(20)
+
+  expediente   Expediente @relation(fields: [expedienteId], references: [id])
+
+  @@map("alergias")
+}
+
+model Cita {
+  id                Int        @id @default(autoincrement())
+  pacienteId        Int        @map("paciente_id")
+  medicoId          Int        @map("medico_id")
+  fechaHoraInicio   DateTime   @map("fecha_hora_inicio")
+  fechaHoraFin      DateTime   @map("fecha_hora_fin")
+  estado            EstadoCita @default(pendiente)
+  motivoCancelacion String?    @map("motivo_cancelacion")
+  notas             String?
+  creadoEn          DateTime   @default(now()) @map("creado_en")
+
+  paciente          Paciente   @relation(fields: [pacienteId], references: [id])
+  medico            Usuario    @relation("CitasMedico", fields: [medicoId], references: [id])
+
+  @@map("citas")
+}
+
+model Documento {
+  id           Int        @id @default(autoincrement())
+  expedienteId Int        @map("expediente_id")
+  nombre       String     @db.VarChar(255)
+  urlSpaces    String     @map("url_spaces")
+  tipoMime     String?    @map("tipo_mime") @db.VarChar(100)
+  tamanoBytes  Int?       @map("tamano_bytes")
+  creadoEn     DateTime   @default(now()) @map("creado_en")
+
+  expediente   Expediente @relation(fields: [expedienteId], references: [id])
+
+  @@map("documentos")
+}
+
+model Auditoria {
+  id          Int      @id @default(autoincrement())
+  usuarioId   Int?     @map("usuario_id")
+  accion      String   @db.VarChar(100)
+  tabla       String?  @db.VarChar(50)
+  registroId  Int?     @map("registro_id")
+  datosAntes  Json?    @map("datos_antes")
+  datosDespues Json?   @map("datos_despues")
+  ip          String?  @db.VarChar(45)
+  creadoEn    DateTime @default(now()) @map("creado_en")
+
+  usuario     Usuario? @relation(fields: [usuarioId], references: [id])
+
+  @@map("auditoria")
+}
