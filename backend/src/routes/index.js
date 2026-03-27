@@ -4,9 +4,11 @@ const { Router } = require('express');
 
 const router = Router();
 
-// Los routers de cada dominio se agregan aquí a medida que se implementan:
-// router.use('/auth',         require('./auth'));
-// router.use('/usuarios',     require('./usuarios'));
+router.use('/auth',     require('./auth'));
+router.use('/usuarios', require('./usuarios'));
+
+// Próximos sprints:
+// router.use('/pacientes',    require('./pacientes'));
 // router.use('/pacientes',    require('./pacientes'));
 // router.use('/expedientes',  require('./expedientes'));
 // router.use('/consultas',    require('./consultas'));
