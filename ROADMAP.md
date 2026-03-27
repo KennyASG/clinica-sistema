@@ -14,7 +14,7 @@
 - [x] **Configurar backend base** — Node.js + Express + Prisma + variables de entorno ✅ 2026-03-27
 - [x] **Trasladar schema SQL a Prisma** — Convertir `clinica_db_creation.sql` a `schema.prisma` ✅ 2026-03-27
 - [x] **Configurar frontend base** — React + Vite + Tailwind + React Router + React Query ✅ 2026-03-27
-- [-] **Configurar mobile base** — Expo + React Navigation + AsyncStorage 🏗️ 2026-03-27
+- [x] **Configurar mobile base** — Expo + React Navigation + AsyncStorage ✅ 2026-03-27
 - [x] **Configurar GitHub repo** — Branches `main` y `develop`, `.gitignore` por subcarpeta ✅ 2026-03-27
 - [x] **Crear archivos de specs** — Copiar requerimientos y reglas de negocio a `/specs/` ✅ 2026-03-27
 - [x] **Configurar `.env.example`** — Todas las variables sin valores reales ✅ 2026-03-27
