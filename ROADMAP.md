@@ -13,7 +13,7 @@
 - [x] **Crear monorepo con estructura de carpetas** — `/backend`, `/frontend`, `/mobile`, `/database`, `/specs` ✅ 2026-03-27
 - [x] **Configurar backend base** — Node.js + Express + Prisma + variables de entorno ✅ 2026-03-27
 - [ ] **Trasladar schema SQL a Prisma** — Convertir `clinica_db_creation.sql` a `schema.prisma`
-- [ ] **Configurar frontend base** — React + Vite + Tailwind + React Router + React Query
+- [x] **Configurar frontend base** — React + Vite + Tailwind + React Router + React Query ✅ 2026-03-27
 - [ ] **Configurar mobile base** — Expo + React Navigation + AsyncStorage
 - [x] **Configurar GitHub repo** — Branches `main` y `develop`, `.gitignore` por subcarpeta ✅ 2026-03-27
 - [ ] **Crear archivos de specs** — Copiar requerimientos y reglas de negocio a `/specs/`
