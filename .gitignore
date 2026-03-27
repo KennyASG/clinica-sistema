@@ -1,0 +1,32 @@
+# Dependencias
+node_modules/
+
+# Variables de entorno (nunca al repo)
+.env
+.env.local
+.env.*.local
+
+# Builds
+dist/
+build/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+
+# Prisma
+backend/prisma/migrations/
+
+# Expo
+mobile/.expo/
+mobile/android/
+mobile/ios/
