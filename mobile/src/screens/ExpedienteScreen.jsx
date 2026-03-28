@@ -3,6 +3,7 @@ import {
   View, Text, ScrollView, StyleSheet,
   ActivityIndicator, TouchableOpacity,
 } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import api from '../services/api';
 
 function iniciales(nombre = '') {
@@ -81,7 +82,8 @@ export default function ExpedienteScreen({ route }) {
     <View style={styles.flex}>
       {/* Banner solo lectura — PERMANENTE */}
       <View style={styles.banner}>
-        <Text style={styles.bannerTexto}>🔒 Solo lectura · Acceso de emergencia</Text>
+        <Feather name="lock" size={11} color="#94a3b8" style={{ marginRight: 6 }} />
+        <Text style={styles.bannerTexto}>Solo lectura · Acceso de emergencia</Text>
       </View>
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
@@ -106,10 +108,10 @@ export default function ExpedienteScreen({ route }) {
           </View>
         </View>
 
-        {/* ⚠️ ALERGIAS — RF-24: visible sin scroll, PRIMERO */}
+        {/* ALERGIAS — RF-24: visible sin scroll, PRIMERO */}
         {exp?.tieneAlergias && exp?.alergias ? (
           <View style={styles.alergiaBanner}>
-            <Text style={styles.alergiaIcono}>⚠️</Text>
+            <Feather name="alert-triangle" size={20} color="#ef4444" style={{ marginRight: 12, marginTop: 1 }} />
             <View style={styles.alergiaInfo}>
               <Text style={styles.alergiaTitulo}>ALERGIAS</Text>
               <Text style={styles.alergiaTexto}>{exp.alergias}</Text>
@@ -117,14 +119,15 @@ export default function ExpedienteScreen({ route }) {
           </View>
         ) : (
           <View style={styles.sinAlergias}>
-            <Text style={styles.sinAlergiasTexto}>✓ Sin alergias registradas</Text>
+            <Feather name="check-circle" size={14} color="#16a34a" style={{ marginRight: 6 }} />
+            <Text style={styles.sinAlergiasTexto}>Sin alergias registradas</Text>
           </View>
         )}
 
         {/* Medicamentos permanentes — RF-24: SEGUNDO */}
         {exp?.medicamentosPermanentes ? (
           <View style={styles.medicamentosBanner}>
-            <Text style={styles.medicamentosIcono}>💊</Text>
+            <Feather name="plus-circle" size={18} color="#3b82f6" style={{ marginRight: 12, marginTop: 1 }} />
             <View style={styles.medicamentosInfo}>
               <Text style={styles.medicamentosTitulo}>MEDICAMENTOS PERMANENTES</Text>
               <Text style={styles.medicamentosTexto}>{exp.medicamentosPermanentes}</Text>
@@ -230,7 +233,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#1e293b',
     paddingVertical: 8,
     paddingHorizontal: 16,
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
   },
   bannerTexto: { color: '#94a3b8', fontSize: 12, fontWeight: '500' },
 
@@ -272,7 +277,6 @@ const styles = StyleSheet.create({
     marginTop: 16,
     borderRadius: 10,
   },
-  alergiaIcono: { fontSize: 20, marginRight: 12, marginTop: 1 },
   alergiaInfo: { flex: 1 },
   alergiaTitulo: { fontSize: 11, fontWeight: '700', color: '#dc2626', letterSpacing: 0.5 },
   alergiaTexto: { fontSize: 14, color: '#7f1d1d', marginTop: 3, lineHeight: 20 },
@@ -283,7 +287,9 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginTop: 16,
     padding: 12,
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
   },
   sinAlergiasTexto: { fontSize: 13, color: '#16a34a', fontWeight: '500' },
 
@@ -299,7 +305,6 @@ const styles = StyleSheet.create({
     marginTop: 10,
     borderRadius: 10,
   },
-  medicamentosIcono: { fontSize: 18, marginRight: 12, marginTop: 1 },
   medicamentosInfo: { flex: 1 },
   medicamentosTitulo: { fontSize: 11, fontWeight: '700', color: '#1d4ed8', letterSpacing: 0.5 },
   medicamentosTexto: { fontSize: 14, color: '#1e3a5f', marginTop: 3, lineHeight: 20 },
