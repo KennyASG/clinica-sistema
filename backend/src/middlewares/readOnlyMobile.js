@@ -4,10 +4,12 @@ const errorResponse = require('../utils/errorResponse');
 
 const METODOS_ESCRITURA = ['POST', 'PATCH', 'PUT', 'DELETE'];
 // Auth siempre permitida — el login es POST y la app necesita autenticarse
-const RUTAS_EXCLUIDAS  = ['/api/auth/login', '/api/auth/logout', '/api/auth/me'];
+// Signos vitales permitidos — RN-04 actualizada: enfermeras/médicos toman signos en cabecera
+const RUTAS_EXCLUIDAS  = ['/api/auth/login', '/api/auth/logout', '/api/auth/me', '/api/signos-vitales'];
 
 /**
- * RF-26 — Bloquea escritura cuando el request viene de la app móvil.
+ * RN-04 — Bloquea escritura cuando el request viene de la app móvil,
+ * excepto rutas explícitamente permitidas (auth + signos vitales).
  * La app envía el header X-App-Source: mobile en cada request (ver mobile/src/services/api.js).
  */
 function readOnlyMobile(req, res, next) {

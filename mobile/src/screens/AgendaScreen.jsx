@@ -164,6 +164,14 @@ export default function AgendaScreen({ navigation }) {
                       <Text style={styles.notasTexto}>{cita.notasSecretaria}</Text>
                     </View>
                   ) : null}
+
+                  {/* Indicador de signos vitales */}
+                  {!esTerminal && cita.signosVitales && (
+                    <View style={styles.svRegistradoRow}>
+                      <Feather name="activity" size={11} color="#16a34a" style={{ marginRight: 4 }} />
+                      <Text style={styles.svRegistradoTexto}>Signos vitales registrados</Text>
+                    </View>
+                  )}
                 </View>
               </TouchableOpacity>
             );
@@ -274,4 +282,14 @@ const styles = StyleSheet.create({
     borderTopColor: '#f8fafc',
   },
   notasTexto: { fontSize: 12, color: '#64748b', flex: 1 },
+
+  svRegistradoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#f1f5f9',
+  },
+  svRegistradoTexto: { fontSize: 12, color: '#16a34a', fontWeight: '500' },
 });

@@ -7,11 +7,13 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import LoginScreen    from './src/screens/LoginScreen';
-import BusquedaScreen from './src/screens/BusquedaScreen';
-import ExpedienteScreen from './src/screens/ExpedienteScreen';
-import AgendaScreen   from './src/screens/AgendaScreen';
-import { logout }     from './src/services/auth';
+import LoginScreen           from './src/screens/LoginScreen';
+import BusquedaScreen        from './src/screens/BusquedaScreen';
+import ExpedienteScreen      from './src/screens/ExpedienteScreen';
+import AgendaScreen          from './src/screens/AgendaScreen';
+import SignosScreen          from './src/screens/SignosScreen';
+import RegistrarSignosScreen from './src/screens/RegistrarSignosScreen';
+import { logout }            from './src/services/auth';
 
 const Stack = createNativeStackNavigator();
 const Tab   = createBottomTabNavigator();
@@ -69,6 +71,25 @@ function AgendaStack() {
   );
 }
 
+function SignosStack() {
+  return (
+    <Stack.Navigator screenOptions={HEADER_OPTS}>
+      <Stack.Screen
+        name="SignosMain"
+        component={SignosScreen}
+        options={{ title: 'Signos vitales' }}
+      />
+      <Stack.Screen
+        name="RegistrarSignos"
+        component={RegistrarSignosScreen}
+        options={({ route }) => ({
+          title: route.params?.cita?.paciente?.nombreCompleto?.split(' ')[0] || 'Signos vitales',
+        })}
+      />
+    </Stack.Navigator>
+  );
+}
+
 function TabsAutenticadas({ onLogout }) {
   return (
     <Tab.Navigator
@@ -84,15 +105,16 @@ function TabsAutenticadas({ onLogout }) {
         tabBarItemStyle: { paddingVertical: 4 },
         tabBarLabelStyle: { fontSize: 11, fontWeight: '600', marginTop: 2 },
         tabBarIcon: ({ color, size }) => {
-          const icon = route.name === 'Busqueda' ? 'search' : 'calendar';
-          return <Feather name={icon} size={size - 2} color={color} />;
+          const icons = { Busqueda: 'search', Agenda: 'calendar', Signos: 'activity' };
+          return <Feather name={icons[route.name] ?? 'circle'} size={size - 2} color={color} />;
         },
       })}
     >
       <Tab.Screen name="Busqueda" options={{ title: 'Pacientes' }}>
-          {() => <BusquedaStack onLogout={onLogout} />}
-        </Tab.Screen>
-      <Tab.Screen name="Agenda"   component={AgendaStack}   options={{ title: 'Mi agenda' }} />
+        {() => <BusquedaStack onLogout={onLogout} />}
+      </Tab.Screen>
+      <Tab.Screen name="Agenda"  component={AgendaStack}  options={{ title: 'Mi agenda' }} />
+      <Tab.Screen name="Signos"  component={SignosStack}  options={{ title: 'Signos' }} />
     </Tab.Navigator>
   );
 }
