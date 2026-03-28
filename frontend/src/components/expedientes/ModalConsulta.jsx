@@ -8,7 +8,7 @@ const FORM_INICIAL = {
   proximaCitaDias: '', esEmergencia: false,
 };
 
-export default function ModalConsulta({ expedienteId, onCerrar }) {
+export default function ModalConsulta({ expedienteId, citaId, onCerrar }) {
   const qc = useQueryClient();
   const [form, setForm] = useState(FORM_INICIAL);
   const [apiError, setApiError] = useState('');
@@ -32,6 +32,7 @@ export default function ModalConsulta({ expedienteId, onCerrar }) {
     setApiError('');
     const payload = {
       expedienteId,
+      ...(citaId && { citaId }),
       motivoConsulta: form.motivoConsulta,
       esEmergencia: form.esEmergencia,
       ...(form.diagnosticoCie10 && { diagnosticoCie10: form.diagnosticoCie10 }),
@@ -48,7 +49,12 @@ export default function ModalConsulta({ expedienteId, onCerrar }) {
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-800">Nueva nota de consulta</h2>
+          <div>
+            <h2 className="text-lg font-semibold text-gray-800">Nueva nota de consulta</h2>
+            {citaId && (
+              <p className="text-xs text-blue-600 mt-0.5">Vinculada a cita programada</p>
+            )}
+          </div>
           <button onClick={onCerrar} className="text-gray-400 hover:text-gray-600 text-xl leading-none">×</button>
         </div>
 

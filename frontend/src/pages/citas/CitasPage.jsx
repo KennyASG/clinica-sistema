@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../../context/AuthContext';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import ModalCancelarCita from '../../components/citas/ModalCancelarCita';
 import api from '../../services/api';
 
@@ -164,6 +164,7 @@ export default function CitasPage() {
               key={cita.id}
               cita={cita}
               puedeModificar={puedeModificar}
+              rolUsuario={usuario?.rol}
               onCancelar={() => setCitaACancelar(cita)}
             />
           ))
@@ -181,8 +182,9 @@ export default function CitasPage() {
   );
 }
 
-function FilaCita({ cita, puedeModificar, onCancelar }) {
+function FilaCita({ cita, puedeModificar, onCancelar, rolUsuario }) {
   const qc = useQueryClient();
+  const navigate = useNavigate();
   const [menuAbierto, setMenuAbierto] = useState(false);
 
   const badge     = ESTADO_BADGE[cita.estado] ?? { cls: 'bg-gray-100 text-gray-500', label: cita.estado };
@@ -193,6 +195,12 @@ function FilaCita({ cita, puedeModificar, onCancelar }) {
 
   const TERMINALES = ['atendida', 'cancelada', 'no_presentada'];
   const esTerminal = TERMINALES.includes(cita.estado);
+
+  // URL al expediente — si es médico y la cita no está terminal, incluye citaId
+  // para abrir el modal de consulta automáticamente
+  const urlExpediente = rolUsuario === 'medico' && !esTerminal
+    ? `/expedientes/paciente/${cita.paciente?.id}?citaId=${cita.id}`
+    : `/expedientes/paciente/${cita.paciente?.id}`;
 
   const mutEstado = useMutation({
     mutationFn: (estado) => api.patch(`/citas/${cita.id}`, { estado }),
@@ -224,7 +232,15 @@ function FilaCita({ cita, puedeModificar, onCancelar }) {
         {badge.label}
       </span>
 
-      {/* Acciones */}
+      {/* Ver expediente — siempre visible */}
+      <button
+        onClick={() => navigate(urlExpediente)}
+        className="text-xs text-blue-500 hover:underline flex-shrink-0"
+      >
+        Ver expediente
+      </button>
+
+      {/* Acciones de estado */}
       {puedeModificar && !esTerminal && (
         <div className="flex items-center gap-2 flex-shrink-0">
           {siguiente && (

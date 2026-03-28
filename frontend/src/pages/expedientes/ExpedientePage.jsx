@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../../context/AuthContext';
 import AlergiasBanner from '../../components/expedientes/AlergiasBanner';
@@ -17,10 +17,12 @@ const TIPO_SANGRE_OPTS = Object.entries(LABEL_TIPO_SANGRE);
 export default function ExpedientePage() {
   const { pacienteId } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const citaIdParam = searchParams.get('citaId');
   const { usuario } = useAuth();
   const qc = useQueryClient();
 
-  const [modalConsulta, setModalConsulta] = useState(false);
+  const [modalConsulta, setModalConsulta] = useState(!!citaIdParam);
   const [editandoExpediente, setEditandoExpediente] = useState(false);
   const [formExp, setFormExp] = useState({});
 
@@ -169,6 +171,7 @@ export default function ExpedientePage() {
       {modalConsulta && exp && (
         <ModalConsulta
           expedienteId={exp.id}
+          citaId={citaIdParam}
           onCerrar={() => setModalConsulta(false)}
         />
       )}

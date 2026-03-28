@@ -17,13 +17,30 @@ async function crear(req, res, next) {
     // Verificar que el expediente existe y está activo (RN-03)
     const expediente = await prisma.expediente.findUnique({
       where: { id: datos.expedienteId },
-      select: { id: true, activo: true },
+      select: { id: true, activo: true, pacienteId: true },
     });
     if (!expediente) {
       return res.status(404).json(errorResponse('Expediente no encontrado', 'NOT_FOUND'));
     }
     if (!expediente.activo) {
       return res.status(409).json(errorResponse('El expediente está inactivo', 'EXPEDIENTE_INACTIVO'));
+    }
+
+    // Si viene citaId: verificar que la cita pertenece al mismo paciente y no tiene consulta ya
+    if (datos.citaId) {
+      const cita = await prisma.cita.findUnique({
+        where: { id: datos.citaId },
+        select: { pacienteId: true, consulta: { select: { id: true } } },
+      });
+      if (!cita) {
+        return res.status(404).json(errorResponse('Cita no encontrada', 'NOT_FOUND'));
+      }
+      if (cita.pacienteId !== expediente.pacienteId) {
+        return res.status(409).json(errorResponse('La cita no corresponde a este paciente', 'CITA_PACIENTE_MISMATCH'));
+      }
+      if (cita.consulta) {
+        return res.status(409).json(errorResponse('Esta cita ya tiene una nota de consulta registrada', 'CONSULTA_DUPLICADA'));
+      }
     }
 
     const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
