@@ -4,7 +4,7 @@ const prisma = require('../utils/prismaClient');
 const errorResponse = require('../utils/errorResponse');
 const registrarAuditoria = require('../utils/auditoria');
 const { enviarConfirmacionCita } = require('../utils/email');
-const { crearCitaSchema, cambiarEstadoSchema } = require('../validators/citas');
+const { crearCitaSchema, cambiarEstadoSchema, reagendarCitaSchema } = require('../validators/citas');
 
 // POST /api/citas — RF-16 + RF-22
 async function crear(req, res, next) {
@@ -144,7 +144,10 @@ async function cambiarEstado(req, res, next) {
     }
     const { estado, motivoCancelacion, notasSecretaria } = parsed.data;
 
-    const cita = await prisma.cita.findUnique({ where: { id } });
+    const cita = await prisma.cita.findUnique({
+      where: { id },
+      include: { consulta: { select: { id: true } } },
+    });
     if (!cita) return res.status(404).json(errorResponse('Cita no encontrada', 'NOT_FOUND'));
 
     const TERMINALES = ['atendida', 'cancelada', 'no_presentada'];
@@ -152,6 +155,14 @@ async function cambiarEstado(req, res, next) {
       return res.status(409).json(errorResponse(
         `La cita ya está en estado "${cita.estado}" y no puede modificarse`,
         'ESTADO_FINAL'
+      ));
+    }
+
+    // Proteger cita si ya tiene consulta registrada
+    if (cita.consulta && ['cancelada', 'no_presentada'].includes(estado)) {
+      return res.status(409).json(errorResponse(
+        'No se puede cancelar una cita que ya tiene una nota de consulta registrada',
+        'CONSULTA_EXISTENTE'
       ));
     }
 
@@ -196,4 +207,85 @@ async function cambiarEstado(req, res, next) {
   }
 }
 
-module.exports = { crear, listar, cambiarEstado };
+// PATCH /api/citas/:id/reagendar
+async function reagendar(req, res, next) {
+  try {
+    const { id } = req.params;
+
+    const parsed = reagendarCitaSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(422).json(errorResponse(parsed.error.issues[0].message, 'VALIDATION_ERROR'));
+    }
+    const { fechaHoraInicio, fechaHoraFin, notasSecretaria } = parsed.data;
+    const inicio = new Date(fechaHoraInicio);
+    const fin    = new Date(fechaHoraFin);
+
+    const cita = await prisma.cita.findUnique({ where: { id } });
+    if (!cita) return res.status(404).json(errorResponse('Cita no encontrada', 'NOT_FOUND'));
+
+    const TERMINALES = ['atendida', 'cancelada', 'no_presentada'];
+    if (TERMINALES.includes(cita.estado)) {
+      return res.status(409).json(errorResponse(
+        'No se puede reagendar una cita en estado final',
+        'ESTADO_FINAL'
+      ));
+    }
+
+    // Verificar conflicto de horario (excluir la cita actual)
+    const conflicto = await prisma.cita.findFirst({
+      where: {
+        medicoId: cita.medicoId,
+        id:       { not: id },
+        estado:   { notIn: ['cancelada', 'no_presentada'] },
+        AND: [
+          { fechaHoraInicio: { lt: fin } },
+          { fechaHoraFin:    { gt: inicio } },
+        ],
+      },
+    });
+    if (conflicto) {
+      return res.status(409).json(errorResponse(
+        'El médico ya tiene una cita en ese horario',
+        'HORARIO_OCUPADO'
+      ));
+    }
+
+    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+
+    const actualizada = await prisma.$transaction(async (tx) => {
+      const c = await tx.cita.update({
+        where: { id },
+        data: {
+          fechaHoraInicio: inicio,
+          fechaHoraFin: fin,
+          estado: 'pendiente', // reagendar vuelve a pendiente para re-confirmar
+          ...(notasSecretaria !== undefined && { notasSecretaria }),
+        },
+        include: {
+          paciente:    { select: { nombreCompleto: true } },
+          medico:      { select: { nombreCompleto: true } },
+          tipoConsulta:{ select: { nombre: true } },
+        },
+      });
+
+      await registrarAuditoria(tx, {
+        usuarioId: req.user.id,
+        accion: 'UPDATE',
+        tablaAfectada: 'cita',
+        registroId: id,
+        datosAnteriores: { fechaHoraInicio: cita.fechaHoraInicio, fechaHoraFin: cita.fechaHoraFin },
+        datosNuevos: { fechaHoraInicio, fechaHoraFin },
+        ip,
+        userAgent: req.headers['user-agent'],
+      });
+
+      return c;
+    });
+
+    return res.json(actualizada);
+  } catch (err) {
+    next(err);
+  }
+}
+
+module.exports = { crear, listar, cambiarEstado, reagendar };

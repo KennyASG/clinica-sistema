@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import ModalCancelarCita from '../../components/citas/ModalCancelarCita';
+import ModalReagendarCita from '../../components/citas/ModalReagendarCita';
 import api from '../../services/api';
 
 const ESTADO_BADGE = {
@@ -38,7 +39,8 @@ export default function CitasPage() {
   const [fecha, setFecha]           = useState(hoy());
   const [medicoFiltro, setMedicoFiltro] = useState('');
   const [estadoFiltro, setEstadoFiltro] = useState('');
-  const [citaACancelar, setCitaACancelar] = useState(null);
+  const [citaACancelar, setCitaACancelar]   = useState(null);
+  const [citaAReagendar, setCitaAReagendar] = useState(null);
 
   const params = new URLSearchParams();
   if (fecha) params.set('fecha', fecha);
@@ -166,6 +168,7 @@ export default function CitasPage() {
               puedeModificar={puedeModificar}
               rolUsuario={usuario?.rol}
               onCancelar={() => setCitaACancelar(cita)}
+              onReagendar={() => setCitaAReagendar(cita)}
             />
           ))
         )}
@@ -178,11 +181,19 @@ export default function CitasPage() {
           onExito={() => { setCitaACancelar(null); refetch(); }}
         />
       )}
+
+      {citaAReagendar && (
+        <ModalReagendarCita
+          cita={citaAReagendar}
+          onCerrar={() => setCitaAReagendar(null)}
+          onExito={() => setCitaAReagendar(null)}
+        />
+      )}
     </div>
   );
 }
 
-function FilaCita({ cita, puedeModificar, onCancelar, rolUsuario }) {
+function FilaCita({ cita, puedeModificar, onCancelar, onReagendar, rolUsuario }) {
   const qc = useQueryClient();
   const navigate = useNavigate();
   const [menuAbierto, setMenuAbierto] = useState(false);
@@ -266,10 +277,10 @@ function FilaCita({ cita, puedeModificar, onCancelar, rolUsuario }) {
                 <div className="fixed inset-0 z-10" onClick={() => setMenuAbierto(false)} />
                 <div className="absolute right-0 mt-1 w-44 bg-white border border-gray-200 rounded shadow-lg z-20 py-1">
                   <button
-                    onClick={() => { setMenuAbierto(false); onCancelar(); }}
-                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                    onClick={() => { setMenuAbierto(false); onReagendar(); }}
+                    className="w-full text-left px-4 py-2 text-sm text-blue-600 hover:bg-blue-50"
                   >
-                    Cancelar cita
+                    Reagendar
                   </button>
                   <button
                     onClick={() => mutEstado.mutate('no_presentada')}
@@ -277,6 +288,13 @@ function FilaCita({ cita, puedeModificar, onCancelar, rolUsuario }) {
                     className="w-full text-left px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-50"
                   >
                     No se presentó
+                  </button>
+                  <hr className="my-1 border-gray-100" />
+                  <button
+                    onClick={() => { setMenuAbierto(false); onCancelar(); }}
+                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                  >
+                    Cancelar cita
                   </button>
                 </div>
               </>

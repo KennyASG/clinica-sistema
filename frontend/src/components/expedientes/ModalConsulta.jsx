@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../../services/api';
+import CIE10Input from './CIE10Input';
 
 const FORM_INICIAL = {
   motivoConsulta: '', diagnosticoCie10: '', diagnosticoDescripcion: '',
@@ -68,9 +69,10 @@ export default function ModalConsulta({ expedienteId, citaId, onCerrar }) {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Código CIE-10</label>
-              <input type="text" name="diagnosticoCie10" value={form.diagnosticoCie10} onChange={handleChange}
-                placeholder="Ej: J06.9" maxLength={10}
-                className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              <CIE10Input
+                value={form.diagnosticoCie10}
+                onChange={(v) => setForm(f => ({ ...f, diagnosticoCie10: v }))}
+              />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Días para próxima cita</label>

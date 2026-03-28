@@ -18,4 +18,16 @@ const crearPacienteSchema = z.object({
   numeroPoliza:        z.string().max(50).optional(),
 });
 
-module.exports = { crearPacienteSchema };
+// Todos los campos opcionales para PATCH parcial
+const editarPacienteSchema = z.object({
+  nombreCompleto:     z.string().min(2).max(200).optional(),
+  telefono:           z.string().min(8).max(20).optional(),
+  telefonoEmergencia: z.string().max(20).optional().nullable(),
+  contactoEmergencia: z.string().max(200).optional().nullable(),
+  direccion:          z.string().optional().nullable(),
+  correo:             z.string().email().optional().or(z.literal('')).nullable(),
+  seguroMedico:       z.string().max(100).optional().nullable(),
+  numeroPoliza:       z.string().max(50).optional().nullable(),
+});
+
+module.exports = { crearPacienteSchema, editarPacienteSchema };

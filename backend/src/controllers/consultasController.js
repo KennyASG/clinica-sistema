@@ -56,6 +56,14 @@ async function crear(req, res, next) {
         },
       });
 
+      // Si la consulta viene de una cita, marcarla automáticamente como atendida
+      if (datos.citaId) {
+        await tx.cita.update({
+          where: { id: datos.citaId },
+          data: { estado: 'atendida' },
+        });
+      }
+
       await registrarAuditoria(tx, {
         usuarioId: req.user.id,
         accion: 'INSERT',

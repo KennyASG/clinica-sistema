@@ -22,9 +22,11 @@ export default function ExpedientePage() {
   const { usuario } = useAuth();
   const qc = useQueryClient();
 
-  const [modalConsulta, setModalConsulta] = useState(!!citaIdParam);
+  const [modalConsulta, setModalConsulta]       = useState(!!citaIdParam);
   const [editandoExpediente, setEditandoExpediente] = useState(false);
-  const [formExp, setFormExp] = useState({});
+  const [editandoPaciente, setEditandoPaciente] = useState(false);
+  const [formExp, setFormExp]   = useState({});
+  const [formPac, setFormPac]   = useState({});
 
   // Datos del paciente + expediente
   const { data: paciente, isLoading } = useQuery({
@@ -47,11 +49,32 @@ export default function ExpedientePage() {
     },
   });
 
+  const mutEditarPac = useMutation({
+    mutationFn: (data) => api.patch(`/pacientes/${pacienteId}`, data),
+    onSuccess: () => {
+      qc.invalidateQueries(['paciente', pacienteId]);
+      setEditandoPaciente(false);
+    },
+  });
+
   if (isLoading) return <p className="text-gray-400 text-sm">Cargando expediente...</p>;
   if (!paciente) return <p className="text-red-500 text-sm">Paciente no encontrado.</p>;
 
   const exp = paciente.expediente;
   const edad = calcularEdad(paciente.fechaNacimiento);
+
+  function iniciarEdicionPaciente() {
+    setFormPac({
+      telefono:           paciente.telefono || '',
+      correo:             paciente.correo || '',
+      direccion:          paciente.direccion || '',
+      contactoEmergencia: paciente.contactoEmergencia || '',
+      telefonoEmergencia: paciente.telefonoEmergencia || '',
+      seguroMedico:       paciente.seguroMedico || '',
+      numeroPoliza:       paciente.numeroPoliza || '',
+    });
+    setEditandoPaciente(true);
+  }
 
   function iniciarEdicion() {
     setFormExp({
@@ -95,11 +118,61 @@ export default function ExpedientePage() {
               </p>
             )}
           </div>
-          <span className={`text-xs px-2 py-1 rounded ${paciente.activo ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
-            {paciente.activo ? 'Activo' : 'Inactivo'}
-          </span>
+          <div className="flex flex-col items-end gap-2">
+            <span className={`text-xs px-2 py-1 rounded ${paciente.activo ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+              {paciente.activo ? 'Activo' : 'Inactivo'}
+            </span>
+            {!editandoPaciente && (
+              <button onClick={iniciarEdicionPaciente} className="text-sm text-blue-600 hover:underline">
+                Editar datos
+              </button>
+            )}
+          </div>
         </div>
       </div>
+
+      {/* Formulario editar datos del paciente */}
+      {editandoPaciente && (
+        <div className="bg-white rounded-lg shadow p-5 mb-4">
+          <h2 className="font-semibold text-gray-700 mb-4">Editar datos de contacto</h2>
+          <div className="grid grid-cols-2 gap-3 text-sm">
+            {[
+              { label: 'Teléfono', key: 'telefono' },
+              { label: 'Correo', key: 'correo' },
+              { label: 'Dirección', key: 'direccion' },
+              { label: 'Contacto de emergencia', key: 'contactoEmergencia' },
+              { label: 'Teléfono de emergencia', key: 'telefonoEmergencia' },
+              { label: 'Seguro médico', key: 'seguroMedico' },
+              { label: 'No. póliza', key: 'numeroPoliza' },
+            ].map(({ label, key }) => (
+              <div key={key}>
+                <label className="block text-xs text-gray-400 uppercase tracking-wide mb-1">{label}</label>
+                <input
+                  type="text"
+                  value={formPac[key]}
+                  onChange={e => setFormPac(f => ({ ...f, [key]: e.target.value }))}
+                  className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            ))}
+          </div>
+          <div className="flex gap-2 mt-4">
+            <button
+              onClick={() => mutEditarPac.mutate(formPac)}
+              disabled={mutEditarPac.isPending}
+              className="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded font-medium"
+            >
+              {mutEditarPac.isPending ? 'Guardando...' : 'Guardar cambios'}
+            </button>
+            <button
+              onClick={() => setEditandoPaciente(false)}
+              className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded"
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Alerta de alergias — SIEMPRE PRIMERO (RF-31) */}
       {exp?.tieneAlergias && <AlergiasBanner alergias={exp.alergias} />}
