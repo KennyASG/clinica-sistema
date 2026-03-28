@@ -6,10 +6,13 @@ function crearTransporter() {
   const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS } = process.env;
   if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS) return null;
 
+  const port = parseInt(SMTP_PORT || '587');
+  const secure = process.env.SMTP_SECURE === 'true' || port === 465;
+
   return nodemailer.createTransport({
     host: SMTP_HOST,
-    port: parseInt(SMTP_PORT || '587'),
-    secure: parseInt(SMTP_PORT || '587') === 465,
+    port,
+    secure,
     auth: { user: SMTP_USER, pass: SMTP_PASS },
   });
 }
@@ -29,7 +32,7 @@ async function enviarConfirmacionCita({ correo, nombrePaciente, medico, fecha, t
 
   try {
     await transporter.sendMail({
-      from: `"Clínica" <${process.env.SMTP_USER}>`,
+      from: process.env.SMTP_FROM || `"Clínica" <${process.env.SMTP_USER}>`,
       to: correo,
       subject: 'Confirmación de cita médica',
       text: [
