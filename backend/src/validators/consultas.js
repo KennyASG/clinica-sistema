@@ -3,8 +3,8 @@
 const { z } = require('zod');
 
 const crearConsultaSchema = z.object({
-  expedienteId:          z.string().uuid('ID de expediente inválido'),
-  citaId:                z.string().uuid().optional(),
+  expedienteId:          z.uuid('ID de expediente inválido'),
+  citaId:                z.uuid().optional(),
   motivoConsulta:        z.string().min(5, 'El motivo debe tener al menos 5 caracteres'),
   diagnosticoCie10:      z.string().max(10).optional(),
   diagnosticoDescripcion:z.string().optional(),

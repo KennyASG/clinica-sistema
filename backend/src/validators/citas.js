@@ -5,9 +5,9 @@ const { z } = require('zod');
 const ESTADOS_VALIDOS = ['pendiente', 'confirmada', 'en_atencion', 'atendida', 'cancelada', 'no_presentada'];
 
 const crearCitaSchema = z.object({
-  pacienteId:      z.string().uuid('pacienteId debe ser UUID'),
-  medicoId:        z.string().uuid('medicoId debe ser UUID'),
-  tipoConsultaId:  z.string().uuid('tipoConsultaId debe ser UUID'),
+  pacienteId:      z.uuid('pacienteId debe ser UUID'),
+  medicoId:        z.uuid('medicoId debe ser UUID'),
+  tipoConsultaId:  z.uuid('tipoConsultaId debe ser UUID'),
   fechaHoraInicio: z.iso.datetime(),
   fechaHoraFin:    z.iso.datetime(),
   notasSecretaria: z.string().max(500).optional(),
