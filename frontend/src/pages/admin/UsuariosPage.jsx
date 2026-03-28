@@ -1,23 +1,39 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { UserPlus, X, Pencil, MoreHorizontal } from 'lucide-react';
 import api from '../../services/api';
 
 const ROLES = ['administrador', 'medico', 'enfermera', 'secretaria'];
+
+const ROL_CONFIG = {
+  administrador: { cls: 'bg-violet-50 text-violet-600 border border-violet-200' },
+  medico:        { cls: 'bg-indigo-50 text-indigo-600 border border-indigo-200' },
+  enfermera:     { cls: 'bg-cyan-50 text-cyan-700 border border-cyan-200' },
+  secretaria:    { cls: 'bg-amber-50 text-amber-600 border border-amber-200' },
+};
 
 const FORM_VACIO = {
   nombreCompleto: '', email: '', password: '', rol: 'secretaria',
   numeroColegiado: '', telefono: '',
 };
 
+function iniciales(nombre = '') {
+  const p = nombre.trim().split(' ');
+  return p.length >= 2 ? (p[0][0] + p[1][0]).toUpperCase() : nombre.slice(0, 2).toUpperCase();
+}
+
+const inputCls = 'w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent';
+const labelCls = 'block text-xs font-medium text-slate-500 mb-1.5';
+
 export default function UsuariosPage() {
   const qc = useQueryClient();
-  const [modal, setModal] = useState(null); // null | { modo: 'crear'|'editar', usuario?: object }
-  const [form, setForm] = useState(FORM_VACIO);
+  const [modal, setModal]     = useState(null);
+  const [form, setForm]       = useState(FORM_VACIO);
   const [apiError, setApiError] = useState('');
 
   const { data: usuarios = [], isLoading } = useQuery({
     queryKey: ['usuarios'],
-    queryFn: () => api.get('/usuarios').then((r) => r.data),
+    queryFn: () => api.get('/usuarios').then(r => r.data),
   });
 
   const mutCrear = useMutation({
@@ -39,7 +55,12 @@ export default function UsuariosPage() {
   }
 
   function abrirEditar(u) {
-    setForm({ nombreCompleto: u.nombreCompleto, email: u.email, password: '', rol: u.rol, numeroColegiado: u.numeroColegiado || '', telefono: u.telefono || '' });
+    setForm({
+      nombreCompleto: u.nombreCompleto, email: u.email,
+      password: '', rol: u.rol,
+      numeroColegiado: u.numeroColegiado || '',
+      telefono: u.telefono || '',
+    });
     setApiError('');
     setModal({ modo: 'editar', usuario: u });
   }
@@ -48,7 +69,7 @@ export default function UsuariosPage() {
 
   function handleChange(e) {
     const { name, value } = e.target;
-    setForm((f) => ({ ...f, [name]: value }));
+    setForm(f => ({ ...f, [name]: value }));
   }
 
   function handleSubmit(e) {
@@ -63,120 +84,104 @@ export default function UsuariosPage() {
     }
   }
 
-  async function toggleActivo(u) {
+  function toggleActivo(u) {
     mutEditar.mutate({ id: u.id, data: { activo: !u.activo } });
   }
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-xl font-bold text-gray-800">Gestión de usuarios</h1>
+    <div className="max-w-5xl space-y-5">
+
+      {/* Encabezado */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-xl font-semibold text-slate-900">Usuarios</h1>
+          <p className="text-sm text-slate-400 mt-0.5">{usuarios.length} usuarios registrados</p>
+        </div>
         <button
           onClick={abrirCrear}
-          className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-md"
+          className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
         >
-          + Nuevo usuario
+          <UserPlus className="w-4 h-4" />
+          Nuevo usuario
         </button>
       </div>
 
-      {isLoading ? (
-        <p className="text-gray-500 text-sm">Cargando...</p>
-      ) : (
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50 text-gray-600 uppercase text-xs">
-              <tr>
-                <th className="px-4 py-3 text-left">Nombre</th>
-                <th className="px-4 py-3 text-left">Email</th>
-                <th className="px-4 py-3 text-left">Rol</th>
-                <th className="px-4 py-3 text-left">Estado</th>
-                <th className="px-4 py-3 text-left">Último acceso</th>
-                <th className="px-4 py-3 text-left">Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {usuarios.map((u) => (
-                <tr key={u.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 font-medium text-gray-800">{u.nombreCompleto}</td>
-                  <td className="px-4 py-3 text-gray-600">{u.email}</td>
-                  <td className="px-4 py-3 capitalize">
-                    <span className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded">
-                      {u.rol}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className={`text-xs px-2 py-0.5 rounded ${u.activo ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
-                      {u.activo ? 'Activo' : 'Inactivo'}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-gray-500">
-                    {u.ultimoAcceso ? new Date(u.ultimoAcceso).toLocaleString('es-GT') : '—'}
-                  </td>
-                  <td className="px-4 py-3 space-x-2">
-                    <button
-                      onClick={() => abrirEditar(u)}
-                      className="text-blue-600 hover:underline text-xs"
-                    >
-                      Editar
-                    </button>
-                    <button
-                      onClick={() => toggleActivo(u)}
-                      className="text-gray-500 hover:underline text-xs"
-                    >
-                      {u.activo ? 'Desactivar' : 'Activar'}
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {/* Tabla */}
+      <div className="bg-white border border-slate-100 rounded-xl overflow-hidden">
+        <div className="grid grid-cols-[1fr_200px_120px_100px_160px_80px] gap-4 px-5 py-2.5 bg-slate-50 border-b border-slate-100">
+          {['Usuario', 'Email', 'Rol', 'Estado', 'Último acceso', ''].map(col => (
+            <p key={col} className="text-xs font-semibold text-slate-400 uppercase tracking-wide">{col}</p>
+          ))}
         </div>
-      )}
 
+        {isLoading ? (
+          <div className="py-12 text-center">
+            <p className="text-sm text-slate-400">Cargando...</p>
+          </div>
+        ) : (
+          <div className="divide-y divide-slate-50">
+            {usuarios.map(u => (
+              <FilaUsuario
+                key={u.id}
+                usuario={u}
+                onEditar={() => abrirEditar(u)}
+                onToggle={() => toggleActivo(u)}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Modal */}
       {modal && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
-            <h2 className="text-lg font-semibold mb-4">
-              {modal.modo === 'crear' ? 'Nuevo usuario' : 'Editar usuario'}
-            </h2>
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+              <h2 className="text-base font-semibold text-slate-900">
+                {modal.modo === 'crear' ? 'Nuevo usuario' : 'Editar usuario'}
+              </h2>
+              <button
+                onClick={cerrarModal}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
 
-            <form onSubmit={handleSubmit} className="space-y-3">
-              <Field label="Nombre completo" name="nombreCompleto" value={form.nombreCompleto} onChange={handleChange} required />
-              <Field label="Email" name="email" type="email" value={form.email} onChange={handleChange} required />
-              <Field
-                label={modal.modo === 'crear' ? 'Contraseña' : 'Nueva contraseña (dejar vacío para no cambiar)'}
+            <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
+              <CampoInput label="Nombre completo" name="nombreCompleto" value={form.nombreCompleto} onChange={handleChange} />
+              <CampoInput label="Email" name="email" type="email" value={form.email} onChange={handleChange} />
+              <CampoInput
+                label={modal.modo === 'crear' ? 'Contraseña' : 'Nueva contraseña (vacío = sin cambio)'}
                 name="password"
                 type="password"
                 value={form.password}
                 onChange={handleChange}
-                required={modal.modo === 'crear'}
               />
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Rol</label>
-                <select
-                  name="rol"
-                  value={form.rol}
-                  onChange={handleChange}
-                  className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
-                >
-                  {ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
+                <label className={labelCls}>Rol</label>
+                <select name="rol" value={form.rol} onChange={handleChange} className={inputCls}>
+                  {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
                 </select>
               </div>
-              <Field label="N° Colegiado (médicos)" name="numeroColegiado" value={form.numeroColegiado} onChange={handleChange} />
-              <Field label="Teléfono" name="telefono" value={form.telefono} onChange={handleChange} />
+              {form.rol === 'medico' && (
+                <CampoInput label="N° Colegiado" name="numeroColegiado" value={form.numeroColegiado} onChange={handleChange} />
+              )}
+              <CampoInput label="Teléfono" name="telefono" value={form.telefono} onChange={handleChange} />
 
               {apiError && (
-                <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded px-3 py-2">{apiError}</p>
+                <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2.5">{apiError}</p>
               )}
 
-              <div className="flex justify-end gap-2 pt-2">
-                <button type="button" onClick={cerrarModal} className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded">
+              <div className="flex justify-end gap-2 pt-1">
+                <button type="button" onClick={cerrarModal}
+                  className="px-4 py-2 text-sm text-slate-500 hover:bg-slate-100 rounded-lg transition-colors">
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={mutCrear.isPending || mutEditar.isPending}
-                  className="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded font-medium"
+                  className="px-4 py-2 text-sm bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-lg font-medium transition-colors"
                 >
                   {mutCrear.isPending || mutEditar.isPending ? 'Guardando...' : 'Guardar'}
                 </button>
@@ -189,17 +194,82 @@ export default function UsuariosPage() {
   );
 }
 
-function Field({ label, name, type = 'text', value, onChange, required = false }) {
+function FilaUsuario({ usuario: u, onEditar, onToggle }) {
+  const [menu, setMenu] = useState(false);
+  const rolCfg = ROL_CONFIG[u.rol] ?? { cls: 'bg-slate-100 text-slate-500 border border-slate-200' };
+  const ultimoAcceso = u.ultimoAcceso
+    ? new Date(u.ultimoAcceso).toLocaleDateString('es-GT', { day: '2-digit', month: 'short', year: 'numeric' })
+    : '—';
+
+  return (
+    <div className={`grid grid-cols-[1fr_200px_120px_100px_160px_80px] gap-4 px-5 py-3.5 items-center hover:bg-slate-50/70 transition-colors ${!u.activo ? 'opacity-50' : ''}`}>
+      <div className="flex items-center gap-3 min-w-0">
+        <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-semibold flex-shrink-0">
+          {iniciales(u.nombreCompleto)}
+        </div>
+        <div className="min-w-0">
+          <p className="text-sm font-medium text-slate-800 truncate">{u.nombreCompleto}</p>
+          {u.numeroColegiado && <p className="text-xs text-slate-400">Col. {u.numeroColegiado}</p>}
+        </div>
+      </div>
+
+      <p className="text-sm text-slate-500 truncate">{u.email}</p>
+
+      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${rolCfg.cls}`}>
+        {u.rol}
+      </span>
+
+      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+        u.activo
+          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+          : 'bg-slate-100 text-slate-400 border border-slate-200'
+      }`}>
+        {u.activo ? 'Activo' : 'Inactivo'}
+      </span>
+
+      <p className="text-xs text-slate-400">{ultimoAcceso}</p>
+
+      <div className="flex justify-end">
+        <div className="relative">
+          <button
+            onClick={() => setMenu(m => !m)}
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+          >
+            <MoreHorizontal className="w-4 h-4" />
+          </button>
+          {menu && (
+            <>
+              <div className="fixed inset-0 z-10" onClick={() => setMenu(false)} />
+              <div className="absolute right-0 mt-1 w-36 bg-white border border-slate-200 rounded-xl shadow-lg z-20 py-1 overflow-hidden">
+                <button
+                  onClick={() => { setMenu(false); onEditar(); }}
+                  className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-2"
+                >
+                  <Pencil className="w-3.5 h-3.5" />
+                  Editar
+                </button>
+                <button
+                  onClick={() => { setMenu(false); onToggle(); }}
+                  className="w-full text-left px-4 py-2 text-sm hover:bg-slate-50 flex items-center gap-2 text-slate-700"
+                >
+                  {u.activo ? 'Desactivar' : 'Activar'}
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CampoInput({ label, name, type = 'text', value, onChange }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+      <label className="block text-xs font-medium text-slate-500 mb-1.5">{label}</label>
       <input
-        type={type}
-        name={name}
-        value={value}
-        onChange={onChange}
-        required={required}
-        className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        type={type} name={name} value={value} onChange={onChange}
+        className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
       />
     </div>
   );
