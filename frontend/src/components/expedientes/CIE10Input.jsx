@@ -63,21 +63,21 @@ export default function CIE10Input({ value, onChange }) {
         value={texto}
         onChange={handleChange}
         onFocus={() => setAbierto(true)}
-        placeholder="Ej: J06.9 o escribe diagnóstico"
+        placeholder="Ej: J06.9 o diagnóstico..."
         maxLength={10}
-        className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
       />
       {abierto && filtrados.length > 0 && (
-        <div className="absolute z-30 w-full bg-white border border-gray-200 rounded shadow-lg mt-1 max-h-52 overflow-y-auto">
+        <div className="absolute z-30 w-80 bg-white border border-slate-200 rounded-xl shadow-lg mt-1 max-h-52 overflow-y-auto py-1">
           {filtrados.map(c => (
             <button
               key={c.codigo}
               type="button"
               onMouseDown={() => seleccionar(c.codigo)}
-              className="w-full text-left px-3 py-2 hover:bg-blue-50 text-sm flex gap-3"
+              className="w-full text-left px-3 py-2 hover:bg-slate-50 text-sm flex gap-3 transition-colors"
             >
-              <span className="font-mono text-blue-700 font-medium w-14 flex-shrink-0">{c.codigo}</span>
-              <span className="text-gray-600 truncate">{c.descripcion}</span>
+              <span className="font-mono text-indigo-600 font-medium w-14 flex-shrink-0">{c.codigo}</span>
+              <span className="text-slate-500 truncate">{c.descripcion}</span>
             </button>
           ))}
         </div>
