@@ -79,23 +79,23 @@
 > Semanas 11-14 | Meta: la secretaria puede reemplazar la agenda física.
 
 ### Backend
-- [ ] **RF-16** — `POST /api/citas` — Agendar cita con validación de conflicto (RN-01)
-- [ ] **RF-17** — Índice único parcial en BD previene doble booking (ya en schema SQL)
-- [ ] **RF-18** — `GET /api/citas?medico=&fecha=` — Agenda del médico por fecha
-- [ ] **RF-19** — `PATCH /api/citas/:id` — Cambiar estado de cita
-- [ ] **RF-20** — Al cancelar, motivo es obligatorio en el body (RN-05)
-- [ ] **RF-22** — Envío de email de confirmación con Nodemailer si paciente tiene correo
+- [x] **RF-16** — `POST /api/citas` — Agendar cita con validación de conflicto (RN-01) ✅ 2026-03-27
+- [x] **RF-17** — Índice único parcial en BD previene doble booking (ya en schema SQL) ✅ 2026-03-27
+- [x] **RF-18** — `GET /api/citas?medico=&fecha=` — Agenda del médico por fecha ✅ 2026-03-27
+- [x] **RF-19** — `PATCH /api/citas/:id` — Cambiar estado de cita ✅ 2026-03-27
+- [x] **RF-20** — Al cancelar, motivo es obligatorio en el body (RN-05) ✅ 2026-03-27
+- [x] **RF-22** — Envío de email de confirmación con Nodemailer si paciente tiene correo ✅ 2026-03-27
 
 ### Frontend web
-- [ ] **Dashboard secretaria** — Agenda del día con métricas y buscador
-- [ ] **Formulario nueva cita** — Búsqueda de paciente, selección de médico, calendario
+- [x] **Dashboard secretaria** — Agenda del día con métricas y buscador ✅ 2026-03-27
+- [x] **Formulario nueva cita** — Búsqueda de paciente, selección de médico, calendario ✅ 2026-03-27
 - [ ] **Vista de calendario semanal por médico** — Slots ocupados/libres
-- [ ] **Modal cancelar cita** — Campo obligatorio de motivo
+- [x] **Modal cancelar cita** — Campo obligatorio de motivo ✅ 2026-03-27
 
 ### Pruebas Sprint 5-6
-- [ ] Prueba: intentar agendar en horario ocupado retorna error descriptivo
-- [ ] Prueba: cancelar cita sin motivo retorna 422
-- [ ] Prueba: agenda del día muestra solo citas no canceladas
+- [x] Prueba: intentar agendar en horario ocupado retorna error descriptivo ✅ 2026-03-27
+- [x] Prueba: cancelar cita sin motivo retorna 422 ✅ 2026-03-27
+- [x] Prueba: agenda del día muestra solo citas no canceladas ✅ 2026-03-27
 
 ---
 
