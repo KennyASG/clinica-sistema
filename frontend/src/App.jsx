@@ -6,6 +6,8 @@ import UsuariosPage from './pages/admin/UsuariosPage';
 import PacientesPage from './pages/expedientes/PacientesPage';
 import CrearPacientePage from './pages/expedientes/CrearPacientePage';
 import ExpedientePage from './pages/expedientes/ExpedientePage';
+import CitasPage from './pages/citas/CitasPage';
+import NuevaCitaPage from './pages/citas/NuevaCitaPage';
 
 function RutaProtegida({ roles, children }) {
   const { usuario } = useAuth();
@@ -60,7 +62,8 @@ export default function App() {
         <Route path="/expedientes/nuevo" element={<CrearPacientePage />} />
         <Route path="/expedientes/paciente/:pacienteId" element={<ExpedientePage />} />
 
-        <Route path="/citas" element={<Placeholder titulo="Citas" />} />
+        <Route path="/citas" element={<CitasPage />} />
+        <Route path="/citas/nueva" element={<NuevaCitaPage />} />
         <Route path="/reportes" element={<Placeholder titulo="Reportes" />} />
         <Route path="/auditoria" element={<Placeholder titulo="Auditoría" />} />
       </Route>
