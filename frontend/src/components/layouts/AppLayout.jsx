@@ -5,6 +5,8 @@ import Sidebar from './Sidebar';
 export default function AppLayout() {
   const { usuario } = useAuth();
 
+  // usuario se pone en null en cuanto limpiarSesion() corre
+  // (disparado por evento auth:expired o por el check periódico)
   if (!usuario) return <Navigate to="/login" replace />;
 
   return (
