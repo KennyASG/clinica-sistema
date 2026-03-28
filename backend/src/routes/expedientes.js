@@ -1,11 +1,14 @@
 'use strict';
 
 const { Router } = require('express');
-const { obtener, editar, metodNoPermitido, historial } = require('../controllers/expedientesController');
+const { obtener, editar, metodNoPermitido, historial, recientes } = require('../controllers/expedientesController');
 const authMiddleware = require('../middlewares/authMiddleware');
 
 const router = Router();
 router.use(authMiddleware);
+
+// GET    /api/expedientes/recientes      — últimos 8 modificados (debe ir antes de /:id)
+router.get('/recientes', recientes);
 
 // GET    /api/expedientes/:id            — ver expediente
 router.get('/:id', obtener);
