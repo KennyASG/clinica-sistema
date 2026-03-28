@@ -122,7 +122,17 @@ async function listar(req, res, next) {
       orderBy: { fechaHoraInicio: 'asc' },
       include: {
         paciente:    { select: { id: true, nombreCompleto: true, dpi: true, telefono: true } },
-        medico:      { select: { id: true, nombreCompleto: true } },
+        medico: {
+          select: {
+            id: true,
+            nombreCompleto: true,
+            especialidades: {
+              where: { esPrincipal: true },
+              select: { especialidad: { select: { nombre: true } } },
+              take: 1,
+            },
+          },
+        },
         tipoConsulta:{ select: { id: true, nombre: true } },
       },
     });

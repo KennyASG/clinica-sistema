@@ -268,6 +268,9 @@ function FilaCita({ cita, puedeModificar, onCancelar, onReagendar, rolUsuario })
       {/* Médico / Tipo */}
       <div className="min-w-0">
         <p className="text-sm text-slate-600 truncate">Dr. {cita.medico?.nombreCompleto}</p>
+        {cita.medico?.especialidades?.[0]?.especialidad?.nombre && (
+          <p className="text-xs text-indigo-400 truncate">{cita.medico.especialidades[0].especialidad.nombre}</p>
+        )}
         {cita.tipoConsulta && (
           <p className="text-xs text-slate-400 truncate">{cita.tipoConsulta.nombre}</p>
         )}
