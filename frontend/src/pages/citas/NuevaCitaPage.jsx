@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { ChevronLeft, UserCheck, X } from 'lucide-react';
+import { ChevronLeft, UserCheck, X, ChevronDown, Stethoscope } from 'lucide-react';
 import api from '../../services/api';
 
 const SLOTS_HORA = (() => {
@@ -33,6 +33,8 @@ export default function NuevaCitaPage() {
   const [form, setForm] = useState(FORM_INICIAL);
   const [busqueda, setBusqueda] = useState('');
   const [pacienteSeleccionado, setPacienteSeleccionado] = useState(null);
+  const [medicoSeleccionado, setMedicoSeleccionado] = useState(null);
+  const [medicoOpen, setMedicoOpen] = useState(false);
   const [apiError, setApiError] = useState('');
 
   const { data: pacientesResultados = [] } = useQuery({
@@ -61,6 +63,12 @@ export default function NuevaCitaPage() {
     setPacienteSeleccionado(p);
     setForm(f => ({ ...f, pacienteId: p.id }));
     setBusqueda('');
+  }
+
+  function seleccionarMedico(m) {
+    setMedicoSeleccionado(m);
+    setForm(f => ({ ...f, medicoId: m.id }));
+    setMedicoOpen(false);
   }
 
   function handleChange(e) {
@@ -173,12 +181,70 @@ export default function NuevaCitaPage() {
           {/* Médico */}
           <div>
             <label className={labelCls}>Médico *</label>
-            <select name="medicoId" value={form.medicoId} onChange={handleChange} className={inputCls}>
-              <option value="">Seleccionar médico...</option>
-              {medicos.map(m => (
-                <option key={m.id} value={m.id}>{m.nombreCompleto}</option>
-              ))}
-            </select>
+            {medicoSeleccionado ? (
+              <div className="flex items-center justify-between border border-slate-200 rounded-lg px-4 py-2.5 bg-slate-50">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-7 h-7 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0">
+                    <Stethoscope className="w-3.5 h-3.5 text-indigo-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-slate-800">{medicoSeleccionado.nombreCompleto}</p>
+                    {(() => {
+                      const esp = medicoSeleccionado.especialidades?.find(e => e.esPrincipal)?.especialidad?.nombre
+                        || medicoSeleccionado.especialidades?.[0]?.especialidad?.nombre;
+                      return esp ? <p className="text-xs text-slate-400">{esp}</p> : null;
+                    })()}
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => { setMedicoSeleccionado(null); setForm(f => ({ ...f, medicoId: '' })); }}
+                  className="p-1 rounded text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ) : (
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setMedicoOpen(o => !o)}
+                  className={`${inputCls} flex items-center justify-between text-left`}
+                >
+                  <span className={form.medicoId ? 'text-slate-800' : 'text-slate-400'}>
+                    Seleccionar médico...
+                  </span>
+                  <ChevronDown className="w-4 h-4 text-slate-400 flex-shrink-0" />
+                </button>
+                {medicoOpen && (
+                  <>
+                    <div className="fixed inset-0 z-10" onClick={() => setMedicoOpen(false)} />
+                    <div className="absolute z-20 w-full bg-white border border-slate-200 rounded-xl shadow-lg mt-1 max-h-56 overflow-y-auto py-1">
+                      {medicos.map(m => {
+                        const esp = m.especialidades?.find(e => e.esPrincipal)?.especialidad?.nombre
+                          || m.especialidades?.[0]?.especialidad?.nombre;
+                        return (
+                          <button
+                            key={m.id}
+                            type="button"
+                            onClick={() => seleccionarMedico(m)}
+                            className="w-full text-left px-4 py-2.5 hover:bg-slate-50 transition-colors flex items-center gap-3"
+                          >
+                            <div className="w-7 h-7 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0 text-xs font-semibold text-indigo-700">
+                              {m.nombreCompleto.trim().split(' ').slice(0, 2).map(p => p[0]).join('').toUpperCase()}
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-slate-800">{m.nombreCompleto}</p>
+                              {esp && <p className="text-xs text-slate-400">{esp}</p>}
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Tipo de consulta */}
