@@ -17,6 +17,9 @@ app.get('/health', (_req, res) => {
   res.json({ ok: true, version: '1.0.0' });
 });
 
+// RF-26 — Bloquea escritura desde app móvil
+app.use(require('./middlewares/readOnlyMobile'));
+
 // Rutas API
 app.use('/api', require('./routes/index'));
 

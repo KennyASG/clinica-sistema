@@ -103,16 +103,16 @@
 > Semanas 12-15 | Meta: el médico puede atender emergencias con historial en su teléfono.
 
 ### Backend
-- [ ] **Vista `v_expediente_emergencia`** — Ya definida en SQL, verificar que funciona con Prisma
-- [ ] **RF-23** — `GET /api/pacientes?q=` — Mismo endpoint que web, reutilizable en móvil
-- [ ] **RF-26** — Middleware `readOnlyMobile` — Si request viene de app móvil, bloquear POST/PATCH/DELETE
+- [x] **Vista `v_expediente_emergencia`** — Reutilizamos GET /api/pacientes/:id + historial ✅ 2026-03-27
+- [x] **RF-23** — `GET /api/pacientes?q=` — Mismo endpoint que web, reutilizable en móvil ✅ 2026-03-27
+- [x] **RF-26** — Middleware `readOnlyMobile` — Si request viene de app móvil, bloquear POST/PATCH/DELETE ✅ 2026-03-27
 
 ### App móvil
-- [ ] **Pantalla Login** — Mismas credenciales que web, JWT con sesión persistente
-- [ ] **Pantalla búsqueda de paciente** — Searchbar simple, resultados limpios
-- [ ] **Pantalla expediente (solo lectura)** — RF-24: alergias PRIMERO en rojo, medicamentos en azul
-- [ ] **Banner "Solo lectura"** — Visible y permanente en todas las pantallas del expediente
-- [ ] **RF-27** — Persistencia de sesión con AsyncStorage
+- [x] **Pantalla Login** — Mismas credenciales que web, JWT con sesión persistente ✅ 2026-03-27
+- [x] **Pantalla búsqueda de paciente** — Searchbar simple, resultados limpios ✅ 2026-03-27
+- [x] **Pantalla expediente (solo lectura)** — RF-24: alergias PRIMERO en rojo, medicamentos en azul ✅ 2026-03-27
+- [x] **Banner "Solo lectura"** — Visible y permanente en todas las pantallas del expediente ✅ 2026-03-27
+- [x] **RF-27** — Persistencia de sesión con AsyncStorage ✅ 2026-03-27
 
 ### Pruebas Sprint 7-8
 - [ ] Prueba: app en Android muestra alerta de alergia antes de scroll
