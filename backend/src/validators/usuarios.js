@@ -8,7 +8,7 @@ const crearUsuarioSchema = z.object({
   nombreCompleto: z.string().min(2, 'Nombre requerido').max(200),
   email: z.string().email('Email inválido'),
   password: z.string().min(8, 'La contraseña debe tener al menos 8 caracteres'),
-  rol: z.enum(ROLES, { error: 'Rol inválido' }),
+  rol: z.enum(ROLES, { message: 'Rol inválido' }),
   numeroColegiado: z.string().max(20).optional(),
   telefono: z.string().max(20).optional(),
 });

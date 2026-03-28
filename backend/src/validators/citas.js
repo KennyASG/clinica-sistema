@@ -8,8 +8,8 @@ const crearCitaSchema = z.object({
   pacienteId:      z.string().uuid('pacienteId debe ser UUID'),
   medicoId:        z.string().uuid('medicoId debe ser UUID'),
   tipoConsultaId:  z.string().uuid('tipoConsultaId debe ser UUID'),
-  fechaHoraInicio: z.string().datetime({ offset: true, message: 'fechaHoraInicio debe ser ISO-8601' }),
-  fechaHoraFin:    z.string().datetime({ offset: true, message: 'fechaHoraFin debe ser ISO-8601' }),
+  fechaHoraInicio: z.iso.datetime(),
+  fechaHoraFin:    z.iso.datetime(),
   notasSecretaria: z.string().max(500).optional(),
 }).refine(
   (d) => new Date(d.fechaHoraFin) > new Date(d.fechaHoraInicio),
@@ -26,8 +26,8 @@ const cambiarEstadoSchema = z.object({
 );
 
 const reagendarCitaSchema = z.object({
-  fechaHoraInicio: z.string().datetime({ offset: true, message: 'fechaHoraInicio debe ser ISO-8601' }),
-  fechaHoraFin:    z.string().datetime({ offset: true, message: 'fechaHoraFin debe ser ISO-8601' }),
+  fechaHoraInicio: z.iso.datetime(),
+  fechaHoraFin:    z.iso.datetime(),
   notasSecretaria: z.string().max(500).optional(),
 }).refine(
   (d) => new Date(d.fechaHoraFin) > new Date(d.fechaHoraInicio),
