@@ -14,7 +14,7 @@ const ROL_CONFIG = {
 
 const FORM_VACIO = {
   nombreCompleto: '', email: '', password: '', rol: 'secretaria',
-  numeroColegiado: '', telefono: '',
+  numeroColegiado: '', telefono: '', especialidadIds: [],
 };
 
 function iniciales(nombre = '') {
@@ -34,6 +34,11 @@ export default function UsuariosPage() {
   const { data: usuarios = [], isLoading } = useQuery({
     queryKey: ['usuarios'],
     queryFn: () => api.get('/usuarios').then(r => r.data),
+  });
+
+  const { data: especialidades = [] } = useQuery({
+    queryKey: ['especialidades'],
+    queryFn: () => api.get('/especialidades').then(r => r.data),
   });
 
   const mutCrear = useMutation({
@@ -56,10 +61,13 @@ export default function UsuariosPage() {
 
   function abrirEditar(u) {
     setForm({
-      nombreCompleto: u.nombreCompleto, email: u.email,
-      password: '', rol: u.rol,
+      nombreCompleto: u.nombreCompleto,
+      email: u.email,
+      password: '',
+      rol: u.rol,
       numeroColegiado: u.numeroColegiado || '',
       telefono: u.telefono || '',
+      especialidadIds: (u.especialidades || []).map(e => e.especialidad.id),
     });
     setApiError('');
     setModal({ modo: 'editar', usuario: u });
@@ -72,14 +80,24 @@ export default function UsuariosPage() {
     setForm(f => ({ ...f, [name]: value }));
   }
 
+  function toggleEspecialidad(id) {
+    setForm(f => ({
+      ...f,
+      especialidadIds: f.especialidadIds.includes(id)
+        ? f.especialidadIds.filter(x => x !== id)
+        : [...f.especialidadIds, id],
+    }));
+  }
+
   function handleSubmit(e) {
     e.preventDefault();
     setApiError('');
+    const payload = { ...form };
+    if (!payload.password) delete payload.password;
+    if (payload.rol !== 'medico') delete payload.especialidadIds;
     if (modal.modo === 'crear') {
-      mutCrear.mutate(form);
+      mutCrear.mutate(payload);
     } else {
-      const payload = { ...form };
-      if (!payload.password) delete payload.password;
       mutEditar.mutate({ id: modal.usuario.id, data: payload });
     }
   }
@@ -135,8 +153,8 @@ export default function UsuariosPage() {
       {/* Modal */}
       {modal && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 flex-shrink-0">
               <h2 className="text-base font-semibold text-slate-900">
                 {modal.modo === 'crear' ? 'Nuevo usuario' : 'Editar usuario'}
               </h2>
@@ -148,32 +166,71 @@ export default function UsuariosPage() {
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
-              <CampoInput label="Nombre completo" name="nombreCompleto" value={form.nombreCompleto} onChange={handleChange} />
-              <CampoInput label="Email" name="email" type="email" value={form.email} onChange={handleChange} />
-              <CampoInput
-                label={modal.modo === 'crear' ? 'Contraseña' : 'Nueva contraseña (vacío = sin cambio)'}
-                name="password"
-                type="password"
-                value={form.password}
-                onChange={handleChange}
-              />
-              <div>
-                <label className={labelCls}>Rol</label>
-                <select name="rol" value={form.rol} onChange={handleChange} className={inputCls}>
-                  {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
-                </select>
+            <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
+              <div className="px-6 py-5 space-y-4 overflow-y-auto flex-1">
+                <CampoInput label="Nombre completo" name="nombreCompleto" value={form.nombreCompleto} onChange={handleChange} />
+                <CampoInput label="Email" name="email" type="email" value={form.email} onChange={handleChange} />
+                <CampoInput
+                  label={modal.modo === 'crear' ? 'Contraseña' : 'Nueva contraseña (vacío = sin cambio)'}
+                  name="password"
+                  type="password"
+                  value={form.password}
+                  onChange={handleChange}
+                />
+                <div>
+                  <label className={labelCls}>Rol</label>
+                  <select name="rol" value={form.rol} onChange={handleChange} className={inputCls}>
+                    {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
+                  </select>
+                </div>
+
+                {form.rol === 'medico' && (
+                  <>
+                    <CampoInput label="N° Colegiado" name="numeroColegiado" value={form.numeroColegiado} onChange={handleChange} />
+                    <div>
+                      <label className={labelCls}>Especialidades</label>
+                      <div className="border border-slate-200 rounded-lg divide-y divide-slate-100 overflow-hidden">
+                        {especialidades.length === 0 ? (
+                          <p className="px-3 py-2.5 text-sm text-slate-400">No hay especialidades registradas</p>
+                        ) : (
+                          especialidades.map(esp => {
+                            const checked = form.especialidadIds.includes(esp.id);
+                            const esPrincipal = form.especialidadIds[0] === esp.id;
+                            return (
+                              <label
+                                key={esp.id}
+                                className="flex items-center gap-3 px-3 py-2.5 cursor-pointer hover:bg-slate-50 transition-colors"
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={checked}
+                                  onChange={() => toggleEspecialidad(esp.id)}
+                                  className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                                />
+                                <span className="text-sm text-slate-700 flex-1">{esp.nombre}</span>
+                                {checked && esPrincipal && (
+                                  <span className="text-xs text-indigo-500 font-medium">Principal</span>
+                                )}
+                              </label>
+                            );
+                          })
+                        )}
+                      </div>
+                      {form.especialidadIds.length > 1 && (
+                        <p className="text-xs text-slate-400 mt-1.5">La primera seleccionada se marca como principal.</p>
+                      )}
+                    </div>
+                  </>
+                )}
+
+                <CampoInput label="Teléfono" name="telefono" value={form.telefono} onChange={handleChange} />
+
+                {apiError && (
+                  <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2.5">{apiError}</p>
+                )}
               </div>
-              {form.rol === 'medico' && (
-                <CampoInput label="N° Colegiado" name="numeroColegiado" value={form.numeroColegiado} onChange={handleChange} />
-              )}
-              <CampoInput label="Teléfono" name="telefono" value={form.telefono} onChange={handleChange} />
 
-              {apiError && (
-                <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2.5">{apiError}</p>
-              )}
-
-              <div className="flex justify-end gap-2 pt-1">
+              <div className="flex justify-end gap-2 px-6 py-4 border-t border-slate-100 flex-shrink-0">
                 <button type="button" onClick={cerrarModal}
                   className="px-4 py-2 text-sm text-slate-500 hover:bg-slate-100 rounded-lg transition-colors">
                   Cancelar
@@ -201,6 +258,9 @@ function FilaUsuario({ usuario: u, onEditar, onToggle }) {
     ? new Date(u.ultimoAcceso).toLocaleDateString('es-GT', { day: '2-digit', month: 'short', year: 'numeric' })
     : '—';
 
+  const especialidadPrincipal = u.especialidades?.find(e => e.esPrincipal)?.especialidad?.nombre
+    || u.especialidades?.[0]?.especialidad?.nombre;
+
   return (
     <div className={`grid grid-cols-[1fr_200px_120px_100px_160px_80px] gap-4 px-5 py-3.5 items-center hover:bg-slate-50/70 transition-colors ${!u.activo ? 'opacity-50' : ''}`}>
       <div className="flex items-center gap-3 min-w-0">
@@ -209,7 +269,11 @@ function FilaUsuario({ usuario: u, onEditar, onToggle }) {
         </div>
         <div className="min-w-0">
           <p className="text-sm font-medium text-slate-800 truncate">{u.nombreCompleto}</p>
-          {u.numeroColegiado && <p className="text-xs text-slate-400">Col. {u.numeroColegiado}</p>}
+          {u.rol === 'medico' && especialidadPrincipal ? (
+            <p className="text-xs text-slate-400 truncate">{especialidadPrincipal}</p>
+          ) : u.numeroColegiado ? (
+            <p className="text-xs text-slate-400">Col. {u.numeroColegiado}</p>
+          ) : null}
         </div>
       </div>
 

@@ -13,5 +13,6 @@ router.use('/signos-vitales', require('./signos-vitales'));
 router.use('/citas',          require('./citas'));
 router.use('/tipo-consultas', require('./tipo-consultas'));
 router.use('/medicos',        require('./medicos'));
+router.use('/especialidades', require('./especialidades'));
 
 module.exports = router;

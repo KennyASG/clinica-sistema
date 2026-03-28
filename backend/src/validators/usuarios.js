@@ -11,6 +11,7 @@ const crearUsuarioSchema = z.object({
   rol: z.enum(ROLES, { message: 'Rol inválido' }),
   numeroColegiado: z.string().max(20).optional(),
   telefono: z.string().max(20).optional(),
+  especialidadIds: z.array(z.uuid()).optional(),
 });
 
 const editarUsuarioSchema = z.object({
@@ -21,6 +22,7 @@ const editarUsuarioSchema = z.object({
   numeroColegiado: z.string().max(20).optional(),
   telefono: z.string().max(20).optional(),
   activo: z.boolean().optional(),
+  especialidadIds: z.array(z.uuid()).optional(),
 });
 
 module.exports = { crearUsuarioSchema, editarUsuarioSchema };

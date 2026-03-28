@@ -12,7 +12,14 @@ router.get('/', async (_req, res, next) => {
   try {
     const medicos = await prisma.usuario.findMany({
       where: { rol: 'medico', activo: true },
-      select: { id: true, nombreCompleto: true, numeroColegiado: true },
+      select: {
+        id: true,
+        nombreCompleto: true,
+        numeroColegiado: true,
+        especialidades: {
+          select: { esPrincipal: true, especialidad: { select: { id: true, nombre: true } } },
+        },
+      },
       orderBy: { nombreCompleto: 'asc' },
     });
     return res.json(medicos);
