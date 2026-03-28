@@ -2,9 +2,10 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
-import { CalendarPlus, MoreHorizontal, ChevronRight, Search } from 'lucide-react';
+import { CalendarPlus, MoreHorizontal, ChevronRight, Search, Activity } from 'lucide-react';
 import ModalCancelarCita from '../../components/citas/ModalCancelarCita';
 import ModalReagendarCita from '../../components/citas/ModalReagendarCita';
+import ModalSignosVitales from '../../components/citas/ModalSignosVitales';
 import api from '../../services/api';
 
 const ESTADO_CONFIG = {
@@ -59,8 +60,9 @@ export default function CitasPage() {
   const [medicoFiltro, setMedicoFiltro] = useState('');
   const [estadoFiltro, setEstadoFiltro] = useState('');
   const [busqueda, setBusqueda]         = useState('');
-  const [citaACancelar, setCitaACancelar]   = useState(null);
-  const [citaAReagendar, setCitaAReagendar] = useState(null);
+  const [citaACancelar, setCitaACancelar]       = useState(null);
+  const [citaAReagendar, setCitaAReagendar]     = useState(null);
+  const [citaSignosVitales, setCitaSignosVitales] = useState(null);
 
   const params = new URLSearchParams();
   if (fecha) params.set('fecha', fecha);
@@ -193,6 +195,7 @@ export default function CitasPage() {
                 rolUsuario={usuario?.rol}
                 onCancelar={() => setCitaACancelar(cita)}
                 onReagendar={() => setCitaAReagendar(cita)}
+                onSignosVitales={() => setCitaSignosVitales(cita)}
               />
             ))}
           </div>
@@ -213,11 +216,17 @@ export default function CitasPage() {
           onExito={() => setCitaAReagendar(null)}
         />
       )}
+      {citaSignosVitales && (
+        <ModalSignosVitales
+          cita={citaSignosVitales}
+          onCerrar={() => setCitaSignosVitales(null)}
+        />
+      )}
     </div>
   );
 }
 
-function FilaCita({ cita, puedeModificar, onCancelar, onReagendar, rolUsuario }) {
+function FilaCita({ cita, puedeModificar, onCancelar, onReagendar, onSignosVitales, rolUsuario }) {
   const qc = useQueryClient();
   const navigate = useNavigate();
   const [menuAbierto, setMenuAbierto] = useState(false);
@@ -288,6 +297,20 @@ function FilaCita({ cita, puedeModificar, onCancelar, onReagendar, rolUsuario })
           Expediente
           <ChevronRight className="w-3 h-3" />
         </button>
+
+        {['enfermera', 'medico', 'administrador'].includes(rolUsuario) && !esTerminal && (
+          <button
+            onClick={onSignosVitales}
+            title={cita.signosVitales ? 'Ver signos vitales' : 'Registrar signos vitales'}
+            className={`p-1.5 rounded-lg transition-colors ${
+              cita.signosVitales
+                ? 'text-emerald-500 hover:text-emerald-700 hover:bg-emerald-50'
+                : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100'
+            }`}
+          >
+            <Activity className="w-4 h-4" />
+          </button>
+        )}
 
         {puedeModificar && !esTerminal && siguiente && (
           <button

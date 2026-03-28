@@ -133,7 +133,8 @@ async function listar(req, res, next) {
             },
           },
         },
-        tipoConsulta:{ select: { id: true, nombre: true } },
+        tipoConsulta:  { select: { id: true, nombre: true } },
+        signosVitales: true,
       },
     });
 
