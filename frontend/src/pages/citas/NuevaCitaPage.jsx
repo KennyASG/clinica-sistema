@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ChevronLeft, UserCheck, X, ChevronDown, Stethoscope } from 'lucide-react';
 import api from '../../services/api';
 
@@ -30,6 +30,7 @@ const labelCls = 'block text-xs font-medium text-slate-500 mb-1.5';
 
 export default function NuevaCitaPage() {
   const navigate = useNavigate();
+  const qc = useQueryClient();
   const [form, setForm] = useState(FORM_INICIAL);
   const [busqueda, setBusqueda] = useState('');
   const [pacienteSeleccionado, setPacienteSeleccionado] = useState(null);
@@ -55,7 +56,7 @@ export default function NuevaCitaPage() {
 
   const mutCrear = useMutation({
     mutationFn: (data) => api.post('/citas', data),
-    onSuccess: () => navigate('/citas'),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['citas'] }); navigate('/citas'); },
     onError: (err) => setApiError(err.response?.data?.message || 'Error al crear la cita'),
   });
 

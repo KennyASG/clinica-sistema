@@ -18,7 +18,7 @@ const ESTADO_CONFIG = {
 
 const SIGUIENTE_ESTADO = {
   pendiente:  { estado: 'confirmada', label: 'Confirmar' },
-  confirmada: { estado: 'atendida',   label: 'Marcar atendida' },
+  confirmada: { estado: 'atendida',   label: 'Atendida' },
 };
 
 const ESTADOS_FILTRO = [
@@ -166,7 +166,7 @@ export default function CitasPage() {
         </div>
 
         {/* Cabecera de columnas */}
-        <div className="grid grid-cols-[100px_1fr_180px_130px_170px] gap-4 px-5 py-2.5 bg-slate-50 border-b border-slate-100">
+        <div className="grid grid-cols-[100px_1fr_180px_130px_190px] gap-4 px-5 py-2.5 bg-slate-50 border-b border-slate-100">
           {['Hora', 'Paciente', 'Médico / Tipo', 'Estado', 'Acciones'].map(col => (
             <p key={col} className="text-xs font-semibold text-slate-400 uppercase tracking-wide">{col}</p>
           ))}
@@ -244,7 +244,7 @@ function FilaCita({ cita, puedeModificar, onCancelar, onReagendar, rolUsuario })
   });
 
   return (
-    <div className={`grid grid-cols-[100px_1fr_180px_130px_170px] gap-4 px-5 py-3 items-center hover:bg-slate-50/70 transition-colors ${esTerminal ? 'opacity-55' : ''}`}>
+    <div className={`grid grid-cols-[100px_1fr_180px_130px_190px] gap-4 px-5 py-3 items-center hover:bg-slate-50/70 transition-colors ${esTerminal ? 'opacity-55' : ''}`}>
 
       {/* Hora */}
       <div>
