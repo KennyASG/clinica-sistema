@@ -62,18 +62,35 @@ export default function NuevaCitaPage() {
     setForm(f => ({ ...f, [name]: value }));
   }
 
+  function parseFechaHora(fecha, hora) {
+    // hora viene como "HH:MM" o "HH:MM:SS" desde type="time"
+    const [hh, mm] = hora.split(':').map(Number);
+    const [yy, mo, dd] = fecha.split('-').map(Number);
+    return new Date(yy, mo - 1, dd, hh, mm, 0);
+  }
+
   function handleSubmit(e) {
     e.preventDefault();
     setApiError('');
 
     if (!form.pacienteId) { setApiError('Seleccione un paciente'); return; }
+    if (!form.medicoId) { setApiError('Seleccione un médico'); return; }
+    if (!form.tipoConsultaId) { setApiError('Seleccione el tipo de consulta'); return; }
     if (!form.fecha || !form.horaInicio || !form.horaFin) {
       setApiError('Complete la fecha y horario de la cita');
       return;
     }
 
-    const fechaHoraInicio = new Date(`${form.fecha}T${form.horaInicio}:00`).toISOString();
-    const fechaHoraFin    = new Date(`${form.fecha}T${form.horaFin}:00`).toISOString();
+    const dtInicio = parseFechaHora(form.fecha, form.horaInicio);
+    const dtFin    = parseFechaHora(form.fecha, form.horaFin);
+
+    if (isNaN(dtInicio.getTime()) || isNaN(dtFin.getTime())) {
+      setApiError('Formato de hora inválido. Use el selector de hora.');
+      return;
+    }
+
+    const fechaHoraInicio = dtInicio.toISOString();
+    const fechaHoraFin    = dtFin.toISOString();
 
     if (new Date(fechaHoraFin) <= new Date(fechaHoraInicio)) {
       setApiError('La hora de fin debe ser posterior a la hora de inicio');
@@ -101,7 +118,7 @@ export default function NuevaCitaPage() {
       <div className="bg-white rounded-lg shadow p-6">
         <h1 className="text-lg font-bold text-gray-900 mb-5">Nueva cita</h1>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} noValidate className="space-y-4">
           {/* Búsqueda de paciente */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Paciente *</label>
@@ -154,7 +171,6 @@ export default function NuevaCitaPage() {
               name="medicoId"
               value={form.medicoId}
               onChange={handleChange}
-              required
               className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">Seleccionar médico...</option>
@@ -171,7 +187,6 @@ export default function NuevaCitaPage() {
               name="tipoConsultaId"
               value={form.tipoConsultaId}
               onChange={handleChange}
-              required
               className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">Seleccionar tipo...</option>
@@ -191,7 +206,6 @@ export default function NuevaCitaPage() {
               name="fecha"
               value={form.fecha}
               onChange={handleChange}
-              required
               min={new Date().toISOString().split('T')[0]}
               className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
@@ -205,7 +219,6 @@ export default function NuevaCitaPage() {
                 name="horaInicio"
                 value={form.horaInicio}
                 onChange={handleChange}
-                required
                 className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -216,7 +229,6 @@ export default function NuevaCitaPage() {
                 name="horaFin"
                 value={form.horaFin}
                 onChange={handleChange}
-                required
                 className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
