@@ -1,21 +1,17 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import { Search, UserPlus, ChevronRight, FolderOpen } from 'lucide-react';
 import api from '../../services/api';
 
-function useDebounce(value, ms = 350) {
-  const [debounced, setDebounced] = useState(value);
-  useState(() => {
-    const t = setTimeout(() => setDebounced(value), ms);
-    return () => clearTimeout(t);
-  });
-  // uso correcto con useEffect
-  return debounced;
+function iniciales(nombre = '') {
+  const p = nombre.trim().split(' ');
+  return p.length >= 2 ? (p[0][0] + p[1][0]).toUpperCase() : nombre.slice(0, 2).toUpperCase();
 }
 
 export default function PacientesPage() {
   const navigate = useNavigate();
-  const [q, setQ] = useState('');
+  const [q, setQ]               = useState('');
   const [busqueda, setBusqueda] = useState('');
 
   const { data: resultados = [], isFetching } = useQuery({
@@ -30,83 +26,87 @@ export default function PacientesPage() {
   }
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-xl font-bold text-gray-800">Pacientes</h1>
+    <div className="max-w-3xl space-y-5">
+
+      {/* Encabezado */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-xl font-semibold text-slate-900">Pacientes</h1>
+          <p className="text-sm text-slate-400 mt-0.5">Busca por nombre o DPI</p>
+        </div>
         <button
           onClick={() => navigate('/expedientes/nuevo')}
-          className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-md"
+          className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
         >
-          + Nuevo paciente
+          <UserPlus className="w-4 h-4" />
+          Nuevo paciente
         </button>
       </div>
 
-      {/* Barra de búsqueda */}
-      <form onSubmit={handleBuscar} className="flex gap-2 mb-6">
-        <input
-          type="text"
-          value={q}
-          onChange={e => setQ(e.target.value)}
-          placeholder="Buscar por nombre o DPI..."
-          className="flex-1 border border-gray-300 rounded-md px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
+      {/* Búsqueda */}
+      <form onSubmit={handleBuscar} className="flex gap-2">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <input
+            type="text"
+            value={q}
+            onChange={e => setQ(e.target.value)}
+            placeholder="Buscar por nombre o DPI..."
+            className="w-full pl-10 pr-4 py-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+          />
+        </div>
         <button
           type="submit"
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+          className="px-4 py-2 text-sm bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors"
         >
           Buscar
         </button>
       </form>
 
-      {/* Resultados */}
-      {isFetching && (
-        <p className="text-sm text-gray-400">Buscando...</p>
-      )}
-
-      {!isFetching && busqueda.length >= 2 && resultados.length === 0 && (
-        <div className="text-center py-10 text-gray-400">
-          <p>No se encontraron pacientes para "{busqueda}"</p>
+      {/* Estados */}
+      {isFetching ? (
+        <p className="text-sm text-slate-400">Buscando...</p>
+      ) : busqueda.length >= 2 && resultados.length === 0 ? (
+        <div className="bg-white border border-slate-100 rounded-xl py-14 text-center">
+          <FolderOpen className="w-8 h-8 text-slate-200 mx-auto mb-2" />
+          <p className="text-sm text-slate-400">No se encontraron pacientes para "{busqueda}"</p>
         </div>
-      )}
-
-      {resultados.length > 0 && (
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50 text-gray-500 uppercase text-xs">
-              <tr>
-                <th className="px-4 py-3 text-left">Nombre completo</th>
-                <th className="px-4 py-3 text-left">DPI</th>
-                <th className="px-4 py-3 text-left">Teléfono</th>
-                <th className="px-4 py-3 text-left">Sexo</th>
-                <th className="px-4 py-3 text-left">Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {resultados.map(p => (
-                <tr key={p.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 font-medium text-gray-800">{p.nombreCompleto}</td>
-                  <td className="px-4 py-3 text-gray-600 font-mono text-xs">{p.dpi}</td>
-                  <td className="px-4 py-3 text-gray-600">{p.telefono}</td>
-                  <td className="px-4 py-3 text-gray-500 capitalize">{p.sexo}</td>
-                  <td className="px-4 py-3">
-                    <button
-                      onClick={() => navigate(`/expedientes/paciente/${p.id}`)}
-                      className="text-blue-600 hover:underline text-xs font-medium"
-                    >
-                      Ver expediente →
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      ) : resultados.length > 0 ? (
+        <div className="bg-white border border-slate-100 rounded-xl overflow-hidden">
+          <div className="grid grid-cols-[1fr_160px_130px_40px] gap-4 px-5 py-2.5 bg-slate-50 border-b border-slate-100">
+            {['Paciente', 'DPI', 'Teléfono', ''].map(col => (
+              <p key={col} className="text-xs font-semibold text-slate-400 uppercase tracking-wide">{col}</p>
+            ))}
+          </div>
+          <div className="divide-y divide-slate-50">
+            {resultados.map(p => (
+              <div
+                key={p.id}
+                onClick={() => navigate(`/expedientes/paciente/${p.id}`)}
+                className="grid grid-cols-[1fr_160px_130px_40px] gap-4 px-5 py-3.5 items-center hover:bg-slate-50/70 cursor-pointer transition-colors"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-semibold flex-shrink-0">
+                    {iniciales(p.nombreCompleto)}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-slate-800 truncate">{p.nombreCompleto}</p>
+                    <p className="text-xs text-slate-400 capitalize">{p.sexo}</p>
+                  </div>
+                </div>
+                <p className="text-xs font-mono text-slate-500">{p.dpi}</p>
+                <p className="text-sm text-slate-500">{p.telefono || '—'}</p>
+                <ChevronRight className="w-4 h-4 text-slate-300" />
+              </div>
+            ))}
+          </div>
         </div>
-      )}
-
-      {busqueda.length < 2 && (
-        <div className="text-center py-16 text-gray-400">
-          <p className="text-4xl mb-3">🔍</p>
-          <p className="text-sm">Escribe al menos 2 caracteres para buscar</p>
+      ) : (
+        <div className="flex flex-col items-center justify-center py-20">
+          <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mb-3">
+            <Search className="w-5 h-5 text-slate-400" />
+          </div>
+          <p className="text-sm text-slate-400">Escribe al menos 2 caracteres para buscar</p>
         </div>
       )}
     </div>
