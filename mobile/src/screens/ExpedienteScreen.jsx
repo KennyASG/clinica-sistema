@@ -193,6 +193,7 @@ export default function ExpedienteScreen({ route }) {
                 {c.tratamiento ? (
                   <Text style={styles.consultaSub}>Tratamiento: {c.tratamiento}</Text>
                 ) : null}
+                <SignosVitales sv={c.cita?.signosVitales} />
               </View>
             ))
           )}
@@ -200,6 +201,38 @@ export default function ExpedienteScreen({ route }) {
 
         <View style={styles.espacioFinal} />
       </ScrollView>
+    </View>
+  );
+}
+
+function SignosVitales({ sv }) {
+  if (!sv) return null;
+
+  const items = [
+    { icon: 'activity',    label: 'PA',     valor: sv.presionArterial,                        unidad: '' },
+    { icon: 'thermometer', label: 'Temp',   valor: sv.temperaturaC != null ? sv.temperaturaC  : null, unidad: '°C' },
+    { icon: 'heart',       label: 'FC',     valor: sv.frecuenciaCardiaca,                      unidad: 'lpm' },
+    { icon: 'wind',        label: 'SpO2',   valor: sv.saturacionO2,                            unidad: '%' },
+    { icon: 'user',        label: 'Peso',   valor: sv.pesoKg != null ? sv.pesoKg              : null, unidad: 'kg' },
+  ].filter(i => i.valor != null && i.valor !== '');
+
+  if (items.length === 0) return null;
+
+  return (
+    <View style={styles.svWrap}>
+      <View style={styles.svHeader}>
+        <Feather name="bar-chart-2" size={11} color="#94a3b8" />
+        <Text style={styles.svTitulo}>SIGNOS VITALES</Text>
+      </View>
+      <View style={styles.svGrid}>
+        {items.map(item => (
+          <View key={item.label} style={styles.svPill}>
+            <Feather name={item.icon} size={12} color="#64748b" style={{ marginRight: 4 }} />
+            <Text style={styles.svLabel}>{item.label} </Text>
+            <Text style={styles.svValor}>{item.valor}{item.unidad}</Text>
+          </View>
+        ))}
+      </View>
     </View>
   );
 }
@@ -363,4 +396,27 @@ const styles = StyleSheet.create({
   consultaSub: { fontSize: 12, color: '#64748b', marginTop: 4 },
 
   espacioFinal: { height: 20 },
+
+  // Signos vitales
+  svWrap: {
+    marginTop: 10,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#f1f5f9',
+  },
+  svHeader: { flexDirection: 'row', alignItems: 'center', gap: 5, marginBottom: 8 },
+  svTitulo: { fontSize: 10, fontWeight: '700', color: '#94a3b8', letterSpacing: 0.5 },
+  svGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+  svPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f8fafc',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  svLabel: { fontSize: 11, color: '#94a3b8' },
+  svValor: { fontSize: 11, fontWeight: '600', color: '#334155' },
 });
