@@ -172,29 +172,7 @@ export default function ExpedienteScreen({ route }) {
             </View>
           ) : (
             consultas.map((c, idx) => (
-              <View key={c.id} style={[styles.consultaCard, idx > 0 && styles.consultaCardMt]}>
-                <View style={styles.consultaHeader}>
-                  <Text style={styles.consultaFecha}>{formatFecha(c.fechaHora)}</Text>
-                  <Text style={styles.consultaMedico}>Dr. {c.medico?.nombreCompleto}</Text>
-                </View>
-                {c.motivoConsulta ? (
-                  <Text style={styles.consultaMotivo}>{c.motivoConsulta}</Text>
-                ) : null}
-                {c.diagnosticoCie10 || c.diagnosticoDescripcion ? (
-                  <View style={styles.diagnosticoRow}>
-                    {c.diagnosticoCie10 && (
-                      <Text style={styles.ciePill}>{c.diagnosticoCie10}</Text>
-                    )}
-                    {c.diagnosticoDescripcion && (
-                      <Text style={styles.diagnosticoDesc}>{c.diagnosticoDescripcion}</Text>
-                    )}
-                  </View>
-                ) : null}
-                {c.tratamiento ? (
-                  <Text style={styles.consultaSub}>Tratamiento: {c.tratamiento}</Text>
-                ) : null}
-                <SignosVitales sv={c.cita?.signosVitales} />
-              </View>
+              <TarjetaConsulta key={c.id} consulta={c} primera={idx === 0} />
             ))
           )}
         </View>
@@ -202,6 +180,78 @@ export default function ExpedienteScreen({ route }) {
         <View style={styles.espacioFinal} />
       </ScrollView>
     </View>
+  );
+}
+
+function TarjetaConsulta({ consulta: c, primera }) {
+  const [expandida, setExpandida] = useState(primera); // primera abierta por defecto
+
+  const tieneDetalle = c.motivoConsulta || c.tratamiento || c.medicamentosRecetados ||
+    c.indicacionesGenerales || c.cita?.signosVitales;
+
+  return (
+    <TouchableOpacity
+      style={[styles.consultaCard, !primera && styles.consultaCardMt]}
+      onPress={() => tieneDetalle && setExpandida(e => !e)}
+      activeOpacity={tieneDetalle ? 0.75 : 1}
+    >
+      {/* Cabecera siempre visible */}
+      <View style={styles.consultaHeader}>
+        <View style={styles.consultaHeaderLeft}>
+          <Text style={styles.consultaFecha}>{formatFecha(c.fechaHora)}</Text>
+          <Text style={styles.consultaMedico}>Dr. {c.medico?.nombreCompleto}</Text>
+        </View>
+        <View style={styles.consultaHeaderRight}>
+          {(c.diagnosticoCie10 || c.diagnosticoDescripcion) && (
+            <View style={styles.diagnosticoRow}>
+              {c.diagnosticoCie10 && <Text style={styles.ciePill}>{c.diagnosticoCie10}</Text>}
+              {c.diagnosticoDescripcion && (
+                <Text style={styles.diagnosticoDesc} numberOfLines={1}>{c.diagnosticoDescripcion}</Text>
+              )}
+            </View>
+          )}
+        </View>
+        {tieneDetalle && (
+          <Feather
+            name={expandida ? 'chevron-up' : 'chevron-down'}
+            size={16}
+            color="#94a3b8"
+            style={{ marginLeft: 8 }}
+          />
+        )}
+      </View>
+
+      {/* Detalle expandible */}
+      {expandida && tieneDetalle && (
+        <View style={styles.consultaDetalle}>
+          {c.motivoConsulta ? (
+            <View style={styles.detalleItem}>
+              <Text style={styles.detalleLabel}>Motivo</Text>
+              <Text style={styles.detalleValor}>{c.motivoConsulta}</Text>
+            </View>
+          ) : null}
+          {c.tratamiento ? (
+            <View style={styles.detalleItem}>
+              <Text style={styles.detalleLabel}>Tratamiento</Text>
+              <Text style={styles.detalleValor}>{c.tratamiento}</Text>
+            </View>
+          ) : null}
+          {c.medicamentosRecetados ? (
+            <View style={styles.detalleItem}>
+              <Text style={styles.detalleLabel}>Medicamentos</Text>
+              <Text style={styles.detalleValor}>{c.medicamentosRecetados}</Text>
+            </View>
+          ) : null}
+          {c.indicacionesGenerales ? (
+            <View style={styles.detalleItem}>
+              <Text style={styles.detalleLabel}>Indicaciones</Text>
+              <Text style={styles.detalleValor}>{c.indicacionesGenerales}</Text>
+            </View>
+          ) : null}
+          <SignosVitales sv={c.cita?.signosVitales} />
+        </View>
+      )}
+    </TouchableOpacity>
   );
 }
 
@@ -380,13 +430,31 @@ const styles = StyleSheet.create({
   consultaCardMt: { marginTop: 8 },
   consultaHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 8,
+    alignItems: 'flex-start',
+    gap: 8,
+  },
+  consultaHeaderLeft: {
+    flex: 0,
+    minWidth: 90,
+  },
+  consultaHeaderRight: {
+    flex: 1,
   },
   consultaFecha: { fontSize: 12, fontWeight: '600', color: '#4f46e5' },
-  consultaMedico: { fontSize: 12, color: '#94a3b8' },
+  consultaMedico: { fontSize: 11, color: '#94a3b8', marginTop: 2 },
   consultaMotivo: { fontSize: 14, color: '#0f172a', lineHeight: 20, marginBottom: 6 },
-  diagnosticoRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 },
+  diagnosticoRow: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 6, marginBottom: 2 },
+
+  consultaDetalle: {
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#f1f5f9',
+    gap: 10,
+  },
+  detalleItem: {},
+  detalleLabel: { fontSize: 11, fontWeight: '700', color: '#94a3b8', letterSpacing: 0.3, marginBottom: 3, textTransform: 'uppercase' },
+  detalleValor: { fontSize: 13, color: '#334155', lineHeight: 19 },
   ciePill: {
     backgroundColor: '#eef2ff', borderRadius: 6,
     paddingHorizontal: 8, paddingVertical: 2,

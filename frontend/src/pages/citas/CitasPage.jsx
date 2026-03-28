@@ -254,7 +254,7 @@ function FilaCita({ cita, puedeModificar, onCancelar, onReagendar, rolUsuario })
 
       {/* Paciente */}
       <div className="flex items-center gap-2.5 min-w-0">
-        <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-semibold flex-shrink-0">
+        <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-semibold shrink-0">
           {iniciales(cita.paciente?.nombreCompleto)}
         </div>
         <div className="min-w-0">

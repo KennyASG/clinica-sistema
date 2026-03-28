@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -79,9 +80,8 @@ function TabsAutenticadas({ onLogout }) {
           backgroundColor: '#fff',
           borderTopColor: '#f1f5f9',
           borderTopWidth: 1,
-          paddingBottom: 4,
-          height: 56,
         },
+        tabBarItemStyle: { paddingVertical: 4 },
         tabBarLabelStyle: { fontSize: 11, fontWeight: '600', marginTop: 2 },
         tabBarIcon: ({ color, size }) => {
           const icon = route.name === 'Busqueda' ? 'search' : 'calendar';
@@ -123,6 +123,7 @@ export default function App() {
   }
 
   return (
+    <SafeAreaProvider>
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {!autenticado ? (
@@ -136,5 +137,6 @@ export default function App() {
         )}
       </Stack.Navigator>
     </NavigationContainer>
+    </SafeAreaProvider>
   );
 }
