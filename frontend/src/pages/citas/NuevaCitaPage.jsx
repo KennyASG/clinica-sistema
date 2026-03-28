@@ -3,14 +3,17 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import api from '../../services/api';
 
-function useDebounce(value, delay = 400) {
-  const [debouncedValue, setDebouncedValue] = useState(value);
-  useState(() => {
-    const timer = setTimeout(() => setDebouncedValue(value), delay);
-    return () => clearTimeout(timer);
-  });
-  return debouncedValue;
-}
+// Genera slots de hora: ["06:00", "06:15", ..., "21:00"]
+const SLOTS_HORA = (() => {
+  const slots = [];
+  for (let h = 6; h <= 21; h++) {
+    for (let m = 0; m < 60; m += 15) {
+      if (h === 21 && m > 0) break;
+      slots.push(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
+    }
+  }
+  return slots;
+})();
 
 const FORM_INICIAL = {
   pacienteId: '',
@@ -62,47 +65,35 @@ export default function NuevaCitaPage() {
     setForm(f => ({ ...f, [name]: value }));
   }
 
-  function parseFechaHora(fecha, hora) {
-    // hora viene como "HH:MM" o "HH:MM:SS" desde type="time"
-    const [hh, mm] = hora.split(':').map(Number);
+  function buildISO(fecha, horaHHMM) {
+    const [hh, mm] = horaHHMM.split(':').map(Number);
     const [yy, mo, dd] = fecha.split('-').map(Number);
-    return new Date(yy, mo - 1, dd, hh, mm, 0);
+    return new Date(yy, mo - 1, dd, hh, mm, 0).toISOString();
   }
+
+  // Slots de fin: solo los posteriores a horaInicio
+  const slotsInicio = SLOTS_HORA;
+  const slotsFin = form.horaInicio
+    ? SLOTS_HORA.filter(s => s > form.horaInicio)
+    : SLOTS_HORA;
 
   function handleSubmit(e) {
     e.preventDefault();
     setApiError('');
 
-    if (!form.pacienteId) { setApiError('Seleccione un paciente'); return; }
-    if (!form.medicoId) { setApiError('Seleccione un médico'); return; }
+    if (!form.pacienteId)     { setApiError('Seleccione un paciente'); return; }
+    if (!form.medicoId)       { setApiError('Seleccione un médico'); return; }
     if (!form.tipoConsultaId) { setApiError('Seleccione el tipo de consulta'); return; }
-    if (!form.fecha || !form.horaInicio || !form.horaFin) {
-      setApiError('Complete la fecha y horario de la cita');
-      return;
-    }
-
-    const dtInicio = parseFechaHora(form.fecha, form.horaInicio);
-    const dtFin    = parseFechaHora(form.fecha, form.horaFin);
-
-    if (isNaN(dtInicio.getTime()) || isNaN(dtFin.getTime())) {
-      setApiError('Formato de hora inválido. Use el selector de hora.');
-      return;
-    }
-
-    const fechaHoraInicio = dtInicio.toISOString();
-    const fechaHoraFin    = dtFin.toISOString();
-
-    if (new Date(fechaHoraFin) <= new Date(fechaHoraInicio)) {
-      setApiError('La hora de fin debe ser posterior a la hora de inicio');
-      return;
-    }
+    if (!form.fecha)          { setApiError('Seleccione la fecha de la cita'); return; }
+    if (!form.horaInicio)     { setApiError('Seleccione la hora de inicio'); return; }
+    if (!form.horaFin)        { setApiError('Seleccione la hora de fin'); return; }
 
     mutCrear.mutate({
       pacienteId:      form.pacienteId,
       medicoId:        form.medicoId,
       tipoConsultaId:  form.tipoConsultaId,
-      fechaHoraInicio,
-      fechaHoraFin,
+      fechaHoraInicio: buildISO(form.fecha, form.horaInicio),
+      fechaHoraFin:    buildISO(form.fecha, form.horaFin),
       ...(form.notasSecretaria && { notasSecretaria: form.notasSecretaria }),
     });
   }
@@ -198,7 +189,7 @@ export default function NuevaCitaPage() {
             </select>
           </div>
 
-          {/* Fecha y horario */}
+          {/* Fecha */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Fecha *</label>
             <input
@@ -211,26 +202,44 @@ export default function NuevaCitaPage() {
             />
           </div>
 
+          {/* Horario — selects en lugar de type="time" */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Hora inicio *</label>
-              <input
-                type="time"
+              <select
                 name="horaInicio"
                 value={form.horaInicio}
-                onChange={handleChange}
+                onChange={e => {
+                  const v = e.target.value;
+                  // Si la hora de fin ya no es posterior, limpiarla
+                  setForm(f => ({
+                    ...f,
+                    horaInicio: v,
+                    horaFin: f.horaFin && f.horaFin <= v ? '' : f.horaFin,
+                  }));
+                }}
                 className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
+              >
+                <option value="">-- hora --</option>
+                {slotsInicio.map(s => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Hora fin *</label>
-              <input
-                type="time"
+              <select
                 name="horaFin"
                 value={form.horaFin}
                 onChange={handleChange}
-                className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
+                disabled={!form.horaInicio}
+                className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-50 disabled:text-gray-400"
+              >
+                <option value="">-- hora --</option>
+                {slotsFin.map(s => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
             </div>
           </div>
 
