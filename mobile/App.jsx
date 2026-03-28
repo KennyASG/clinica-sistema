@@ -2,29 +2,113 @@ import { useEffect, useState, useCallback } from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { Feather } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import LoginScreen from './src/screens/LoginScreen';
+import LoginScreen    from './src/screens/LoginScreen';
 import BusquedaScreen from './src/screens/BusquedaScreen';
 import ExpedienteScreen from './src/screens/ExpedienteScreen';
-import { logout } from './src/services/auth';
+import AgendaScreen   from './src/screens/AgendaScreen';
+import { logout }     from './src/services/auth';
 
 const Stack = createNativeStackNavigator();
+const Tab   = createBottomTabNavigator();
+
+const HEADER_OPTS = {
+  headerStyle: { backgroundColor: '#fff' },
+  headerTintColor: '#4f46e5',
+  headerTitleStyle: { fontWeight: '700', color: '#0f172a' },
+  headerShadowVisible: false,
+  contentStyle: { backgroundColor: '#f8fafc' },
+};
+
+function BusquedaStack({ onLogout }) {
+  return (
+    <Stack.Navigator screenOptions={HEADER_OPTS}>
+      <Stack.Screen
+        name="BusquedaMain"
+        component={BusquedaScreen}
+        options={{
+          title: 'Buscar paciente',
+          headerRight: () => (
+            <TouchableOpacity onPress={onLogout} style={{ paddingHorizontal: 4 }}>
+              <Text style={{ fontSize: 13, color: '#94a3b8', fontWeight: '500' }}>Salir</Text>
+            </TouchableOpacity>
+          ),
+        }}
+      />
+      <Stack.Screen
+        name="Expediente"
+        component={ExpedienteScreen}
+        options={({ route }) => ({
+          title: route.params?.paciente?.nombreCompleto?.split(' ')[0] || 'Expediente',
+        })}
+      />
+    </Stack.Navigator>
+  );
+}
+
+function AgendaStack() {
+  return (
+    <Stack.Navigator screenOptions={HEADER_OPTS}>
+      <Stack.Screen
+        name="AgendaMain"
+        component={AgendaScreen}
+        options={{ title: 'Mi agenda' }}
+      />
+      <Stack.Screen
+        name="Expediente"
+        component={ExpedienteScreen}
+        options={({ route }) => ({
+          title: route.params?.paciente?.nombreCompleto?.split(' ')[0] || 'Expediente',
+        })}
+      />
+    </Stack.Navigator>
+  );
+}
+
+function TabsAutenticadas({ onLogout }) {
+  return (
+    <Tab.Navigator
+      screenOptions={({ route }) => ({
+        headerShown: false,
+        tabBarActiveTintColor: '#4f46e5',
+        tabBarInactiveTintColor: '#94a3b8',
+        tabBarStyle: {
+          backgroundColor: '#fff',
+          borderTopColor: '#f1f5f9',
+          borderTopWidth: 1,
+          paddingBottom: 4,
+          height: 56,
+        },
+        tabBarLabelStyle: { fontSize: 11, fontWeight: '600', marginTop: 2 },
+        tabBarIcon: ({ color, size }) => {
+          const icon = route.name === 'Busqueda' ? 'search' : 'calendar';
+          return <Feather name={icon} size={size - 2} color={color} />;
+        },
+      })}
+    >
+      <Tab.Screen name="Busqueda" options={{ title: 'Pacientes' }}>
+          {() => <BusquedaStack onLogout={onLogout} />}
+        </Tab.Screen>
+      <Tab.Screen name="Agenda"   component={AgendaStack}   options={{ title: 'Mi agenda' }} />
+    </Tab.Navigator>
+  );
+}
 
 export default function App() {
   const [verificando, setVerificando] = useState(true);
   const [autenticado, setAutenticado] = useState(false);
 
-  // RF-27 — Verifica sesión persistida al arrancar
   useEffect(() => {
-    AsyncStorage.getItem('token').then((token) => {
+    AsyncStorage.getItem('token').then(token => {
       setAutenticado(!!token);
       setVerificando(false);
     });
   }, []);
 
-  const handleLogin = useCallback(() => setAutenticado(true), []);
-
+  const handleLogin  = useCallback(() => setAutenticado(true), []);
   const handleLogout = useCallback(async () => {
     await logout();
     setAutenticado(false);
@@ -40,53 +124,17 @@ export default function App() {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator
-        screenOptions={{
-          headerStyle: { backgroundColor: '#fff' },
-          headerTintColor: '#4f46e5',
-          headerTitleStyle: { fontWeight: '700', color: '#0f172a' },
-          headerShadowVisible: false,
-          contentStyle: { backgroundColor: '#f8fafc' },
-        }}
-      >
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
         {!autenticado ? (
-          <Stack.Screen
-            name="Login"
-            options={{ headerShown: false }}
-          >
+          <Stack.Screen name="Login">
             {() => <LoginScreen onLoginExitoso={handleLogin} />}
           </Stack.Screen>
         ) : (
-          <>
-            <Stack.Screen
-              name="Busqueda"
-              options={{
-                title: 'Buscar paciente',
-                headerRight: () => (
-                  <LogoutButton onLogout={handleLogout} />
-                ),
-              }}
-            >
-              {(props) => <BusquedaScreen {...props} onLogout={handleLogout} />}
-            </Stack.Screen>
-            <Stack.Screen
-              name="Expediente"
-              options={({ route }) => ({
-                title: route.params?.paciente?.nombreCompleto?.split(' ')[0] || 'Expediente',
-              })}
-              component={ExpedienteScreen}
-            />
-          </>
+          <Stack.Screen name="App">
+            {() => <TabsAutenticadas onLogout={handleLogout} />}
+          </Stack.Screen>
         )}
       </Stack.Navigator>
     </NavigationContainer>
-  );
-}
-
-function LogoutButton({ onLogout }) {
-  return (
-    <TouchableOpacity onPress={onLogout} style={{ paddingHorizontal: 4 }}>
-      <Text style={{ fontSize: 13, color: '#94a3b8', fontWeight: '500' }}>Salir</Text>
-    </TouchableOpacity>
   );
 }
