@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { UserPlus, X, Pencil, MoreHorizontal } from 'lucide-react';
+import PageHeader from '../../components/layouts/PageHeader';
 import api from '../../services/api';
 
 const ROLES = ['administrador', 'medico', 'enfermera', 'secretaria'];
@@ -109,20 +110,19 @@ export default function UsuariosPage() {
   return (
     <div className="max-w-5xl space-y-5">
 
-      {/* Encabezado */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-semibold text-slate-900">Usuarios</h1>
-          <p className="text-sm text-slate-400 mt-0.5">{usuarios.length} usuarios registrados</p>
-        </div>
-        <button
-          onClick={abrirCrear}
-          className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
-        >
-          <UserPlus className="w-4 h-4" />
-          Nuevo usuario
-        </button>
-      </div>
+      <PageHeader
+        titulo="Usuarios"
+        subtitulo={`${usuarios.length} usuarios registrados`}
+        accion={
+          <button
+            onClick={abrirCrear}
+            className="flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+          >
+            <UserPlus className="w-4 h-4" />
+            Nuevo usuario
+          </button>
+        }
+      />
 
       {/* Tabla */}
       <div className="bg-white border border-slate-100 rounded-xl overflow-hidden">
