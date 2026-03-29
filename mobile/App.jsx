@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, ActivityIndicator } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -13,6 +13,7 @@ import ExpedienteScreen      from './src/screens/ExpedienteScreen';
 import AgendaScreen          from './src/screens/AgendaScreen';
 import SignosScreen          from './src/screens/SignosScreen';
 import RegistrarSignosScreen from './src/screens/RegistrarSignosScreen';
+import PerfilScreen          from './src/screens/PerfilScreen';
 import { logout }            from './src/services/auth';
 
 const Stack = createNativeStackNavigator();
@@ -26,20 +27,13 @@ const HEADER_OPTS = {
   contentStyle: { backgroundColor: '#f8fafc' },
 };
 
-function BusquedaStack({ onLogout }) {
+function BusquedaStack() {
   return (
     <Stack.Navigator screenOptions={HEADER_OPTS}>
       <Stack.Screen
         name="BusquedaMain"
         component={BusquedaScreen}
-        options={{
-          title: 'Buscar paciente',
-          headerRight: () => (
-            <TouchableOpacity onPress={onLogout} style={{ paddingHorizontal: 4 }}>
-              <Text style={{ fontSize: 13, color: '#94a3b8', fontWeight: '500' }}>Salir</Text>
-            </TouchableOpacity>
-          ),
-        }}
+        options={{ title: 'Buscar paciente' }}
       />
       <Stack.Screen
         name="Expediente"
@@ -105,16 +99,17 @@ function TabsAutenticadas({ onLogout }) {
         tabBarItemStyle: { paddingVertical: 4 },
         tabBarLabelStyle: { fontSize: 11, fontWeight: '600', marginTop: 2 },
         tabBarIcon: ({ color, size }) => {
-          const icons = { Busqueda: 'search', Agenda: 'calendar', Signos: 'activity' };
+          const icons = { Busqueda: 'search', Agenda: 'calendar', Signos: 'activity', Perfil: 'user' };
           return <Feather name={icons[route.name] ?? 'circle'} size={size - 2} color={color} />;
         },
       })}
     >
-      <Tab.Screen name="Busqueda" options={{ title: 'Pacientes' }}>
-        {() => <BusquedaStack onLogout={onLogout} />}
+      <Tab.Screen name="Busqueda" component={BusquedaStack} options={{ title: 'Pacientes' }} />
+      <Tab.Screen name="Agenda"   component={AgendaStack}   options={{ title: 'Mi agenda' }} />
+      <Tab.Screen name="Signos"   component={SignosStack}   options={{ title: 'Signos' }} />
+      <Tab.Screen name="Perfil"   options={{ title: 'Mi perfil' }}>
+        {() => <PerfilScreen onLogout={onLogout} />}
       </Tab.Screen>
-      <Tab.Screen name="Agenda"  component={AgendaStack}  options={{ title: 'Mi agenda' }} />
-      <Tab.Screen name="Signos"  component={SignosStack}  options={{ title: 'Signos' }} />
     </Tab.Navigator>
   );
 }
