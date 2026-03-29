@@ -6,6 +6,14 @@ import {
 import { Feather } from '@expo/vector-icons';
 import api from '../services/api';
 import { guardarReciente, obtenerRecientes } from '../utils/recientes';
+import { getUsuario } from '../services/auth';
+
+function saludo() {
+  const h = new Date().getHours();
+  if (h < 12) return 'Buenos días';
+  if (h < 19) return 'Buenas tardes';
+  return 'Buenas noches';
+}
 
 function iniciales(nombre = '') {
   const p = nombre.trim().split(' ');
@@ -18,9 +26,11 @@ export default function BusquedaScreen({ navigation }) {
   const [recientes, setRecientes]   = useState([]);
   const [cargando, setCargando]     = useState(false);
   const [buscado, setBuscado]       = useState(false);
+  const [usuario, setUsuario]       = useState(null);
 
   useEffect(() => {
     obtenerRecientes().then(setRecientes);
+    getUsuario().then(setUsuario);
     const unsubscribe = navigation.addListener('focus', () => {
       obtenerRecientes().then(setRecientes);
     });
@@ -58,8 +68,20 @@ export default function BusquedaScreen({ navigation }) {
   const mostrarRecientes = query.length < 2 && recientes.length > 0;
   const mostrarResultados = query.length >= 2;
 
+  const primerNombre = usuario?.nombre?.trim().split(' ')[0];
+
   return (
     <View style={styles.container}>
+
+      {/* Saludo — solo cuando no hay búsqueda activa */}
+      {query.length < 2 && (
+        <View style={styles.saludoWrap}>
+          <Text style={styles.saludoTexto}>
+            {saludo()}{primerNombre ? `, ${primerNombre}` : ''}
+          </Text>
+          <Text style={styles.saludoSub}>¿A quién buscas hoy?</Text>
+        </View>
+      )}
 
       {/* Search bar */}
       <View style={styles.searchBox}>
@@ -173,10 +195,22 @@ function FilaPaciente({ paciente, onPress, separador }) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f8fafc' },
 
+  saludoWrap: {
+    backgroundColor: '#fff',
+    paddingHorizontal: 20,
+    paddingTop: 18,
+    paddingBottom: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
+  },
+  saludoTexto: { fontSize: 20, fontWeight: '700', color: '#0f172a' },
+  saludoSub:   { fontSize: 13, color: '#94a3b8', marginTop: 2 },
+
   searchBox: {
     backgroundColor: '#fff',
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingTop: 10,
+    paddingBottom: 12,
     borderBottomWidth: 1,
     borderBottomColor: '#f1f5f9',
   },

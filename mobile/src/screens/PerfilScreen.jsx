@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, StatusBar } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getUsuario } from '../services/auth';
 
 const ROLES = {
-  medico:        { label: 'Médico',        icon: 'activity',  color: '#4f46e5', bg: '#eef2ff' },
-  enfermera:     { label: 'Enfermera',     icon: 'heart',     color: '#0891b2', bg: '#ecfeff' },
+  medico:        { label: 'Médico',        icon: 'activity',  color: '#0891b2', bg: '#ecfeff' },
+  enfermera:     { label: 'Enfermera',     icon: 'heart',     color: '#16a34a', bg: '#f0fdf4' },
   secretaria:    { label: 'Secretaria',    icon: 'calendar',  color: '#d97706', bg: '#fffbeb' },
   administrador: { label: 'Administrador', icon: 'shield',    color: '#7c3aed', bg: '#f5f3ff' },
 };
@@ -17,6 +18,7 @@ function iniciales(nombre = '') {
 
 export default function PerfilScreen({ onLogout }) {
   const [usuario, setUsuario] = useState(null);
+  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     getUsuario().then(setUsuario);
@@ -28,9 +30,10 @@ export default function PerfilScreen({ onLogout }) {
 
   return (
     <View style={styles.container}>
+      <StatusBar barStyle="light-content" />
 
-      {/* Avatar + nombre */}
-      <View style={styles.header}>
+      {/* Hero header — respeta el notch */}
+      <View style={[styles.hero, { paddingTop: insets.top + 24 }]}>
         <View style={styles.avatar}>
           <Text style={styles.avatarTexto}>{iniciales(usuario.nombre)}</Text>
         </View>
@@ -41,68 +44,69 @@ export default function PerfilScreen({ onLogout }) {
         </View>
       </View>
 
-      {/* Info básica */}
-      <View style={styles.seccion}>
-        <View style={styles.fila}>
-          <Feather name="user" size={15} color="#94a3b8" style={styles.filaIcono} />
-          <View>
-            <Text style={styles.filaLabel}>ID de usuario</Text>
-            <Text style={styles.filaValor}>{usuario.id?.slice(0, 8)}…</Text>
-          </View>
+      {/* Contenido */}
+      <View style={styles.cuerpo}>
+
+        {/* Info básica */}
+        <View style={styles.seccion}>
+          <FilaInfo icono="shield" label="Rol en el sistema" valor={rolCfg.label} />
+          <View style={styles.sep} />
+          <FilaInfo icono="hash" label="ID de usuario" valor={`${usuario.id?.slice(0, 8)}…`} />
+          <View style={styles.sep} />
+          <FilaInfo icono="smartphone" label="Aplicación" valor="Clínica Médica · Móvil" />
         </View>
-        <View style={styles.separador} />
-        <View style={styles.fila}>
-          <Feather name="shield" size={15} color="#94a3b8" style={styles.filaIcono} />
-          <View>
-            <Text style={styles.filaLabel}>Rol en el sistema</Text>
-            <Text style={styles.filaValor}>{rolCfg.label}</Text>
-          </View>
-        </View>
-        <View style={styles.separador} />
-        <View style={styles.fila}>
-          <Feather name="smartphone" size={15} color="#94a3b8" style={styles.filaIcono} />
-          <View>
-            <Text style={styles.filaLabel}>Acceso</Text>
-            <Text style={styles.filaValor}>App móvil · Clínica Médica</Text>
-          </View>
-        </View>
+
+        {/* Cerrar sesión */}
+        <TouchableOpacity style={styles.btnCerrar} onPress={onLogout} activeOpacity={0.8}>
+          <Feather name="log-out" size={16} color="#ef4444" style={{ marginRight: 10 }} />
+          <Text style={styles.btnCerrarTexto}>Cerrar sesión</Text>
+        </TouchableOpacity>
+
       </View>
+    </View>
+  );
+}
 
-      {/* Cerrar sesión */}
-      <TouchableOpacity style={styles.btnCerrar} onPress={onLogout} activeOpacity={0.8}>
-        <Feather name="log-out" size={16} color="#ef4444" style={{ marginRight: 10 }} />
-        <Text style={styles.btnCerrarTexto}>Cerrar sesión</Text>
-      </TouchableOpacity>
-
+function FilaInfo({ icono, label, valor }) {
+  return (
+    <View style={styles.fila}>
+      <View style={styles.filaIconoWrap}>
+        <Feather name={icono} size={15} color="#64748b" />
+      </View>
+      <View>
+        <Text style={styles.filaLabel}>{label}</Text>
+        <Text style={styles.filaValor}>{valor}</Text>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f8fafc',
-    paddingHorizontal: 20,
-    paddingTop: 32,
-  },
+  container: { flex: 1, backgroundColor: '#f8fafc' },
 
-  header: {
+  hero: {
+    backgroundColor: '#0f172a',
     alignItems: 'center',
-    marginBottom: 32,
+    paddingBottom: 32,
+    paddingHorizontal: 24,
   },
   avatar: {
-    width: 72, height: 72, borderRadius: 36,
-    backgroundColor: '#eef2ff',
+    width: 76, height: 76, borderRadius: 38,
+    backgroundColor: '#1e293b',
+    borderWidth: 2,
+    borderColor: '#334155',
     alignItems: 'center', justifyContent: 'center',
     marginBottom: 14,
   },
-  avatarTexto: { fontSize: 26, fontWeight: '700', color: '#4f46e5' },
-  nombre: { fontSize: 20, fontWeight: '700', color: '#0f172a', marginBottom: 10 },
+  avatarTexto: { fontSize: 28, fontWeight: '700', color: '#94a3b8' },
+  nombre:  { fontSize: 20, fontWeight: '700', color: '#f1f5f9', marginBottom: 10 },
   rolPill: {
     flexDirection: 'row', alignItems: 'center',
     borderRadius: 20, paddingHorizontal: 12, paddingVertical: 5,
   },
   rolTexto: { fontSize: 13, fontWeight: '600' },
+
+  cuerpo: { flex: 1, paddingHorizontal: 20, paddingTop: 24 },
 
   seccion: {
     backgroundColor: '#fff',
@@ -110,18 +114,23 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#f1f5f9',
     overflow: 'hidden',
-    marginBottom: 24,
+    marginBottom: 20,
   },
   fila: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 18,
-    paddingVertical: 16,
+    paddingVertical: 15,
   },
-  filaIcono: { marginRight: 14 },
+  filaIconoWrap: {
+    width: 34, height: 34, borderRadius: 10,
+    backgroundColor: '#f8fafc',
+    alignItems: 'center', justifyContent: 'center',
+    marginRight: 14,
+  },
   filaLabel: { fontSize: 11, color: '#94a3b8', fontWeight: '500', marginBottom: 2 },
   filaValor: { fontSize: 14, color: '#0f172a', fontWeight: '500' },
-  separador: { height: 1, backgroundColor: '#f8fafc', marginHorizontal: 18 },
+  sep: { height: 1, backgroundColor: '#f8fafc', marginHorizontal: 18 },
 
   btnCerrar: {
     flexDirection: 'row',
