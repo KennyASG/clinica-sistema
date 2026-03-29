@@ -124,14 +124,14 @@
 ## SPRINT 9 — Reportes, auditoría y catálogos
 > Semanas 15-16 | Meta: el administrador tiene visibilidad completa.
 
-- [ ] **RF-33** — `GET /api/reportes/citas` — Por rango de fechas, filtrable por médico y estado
-- [ ] **RF-34** — `GET /api/reportes/pacientes` — Atendidos por médico en un período
-- [ ] **RF-35** — `GET /api/auditoria` — Bitácora filtrable (solo admin)
-- [ ] **RF-36** — Exportación de reportes a PDF con `pdfkit` o similar
-- [ ] **RF-28/31** — CRUD de catálogos: especialidades, horarios, tipos de consulta
-- [ ] **RF-29** — Seed de catálogo CIE-10 básico (10 diagnósticos más frecuentes de la clínica)
-- [ ] **Pantalla reportes (frontend)** — Filtros de fecha/médico, tabla de resultados, botón PDF
-- [ ] **Pantalla auditoría (frontend)** — Tabla de eventos con usuario y timestamp
+- [x] **RF-33** — `GET /api/reportes/citas` — Por rango de fechas, filtrable por médico y estado ✅ 2026-03-28
+- [x] **RF-34** — `GET /api/reportes/pacientes` — Atendidos por médico en un período ✅ 2026-03-28
+- [x] **RF-35** — `GET /api/auditoria` — Bitácora filtrable (solo admin) ✅ 2026-03-28
+- [x] **RF-36** — Exportación de reportes a PDF con `pdfkit` ✅ 2026-03-28
+- [x] **RF-28/31** — CRUD de catálogos: especialidades, horarios, tipos de consulta ✅ 2026-03-28
+- [x] **RF-29** — Seed de catálogo CIE-10 básico (10 diagnósticos más frecuentes) ✅ 2026-03-28
+- [x] **Pantalla reportes (frontend)** — Filtros de fecha/médico, tabla de resultados, botón PDF ✅ 2026-03-28
+- [x] **Pantalla auditoría (frontend)** — Tabla de eventos con usuario y timestamp ✅ 2026-03-28
 
 ---
 
@@ -172,4 +172,4 @@
 
 ---
 
-*Última actualización: 2026-03-28 | Próximo sprint: Sprint 9 — Reportes, auditoría y catálogos*
+*Última actualización: 2026-03-28 | Próximo sprint: Sprint 10 — Notificaciones y ajustes finales*
