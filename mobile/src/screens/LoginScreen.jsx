@@ -2,8 +2,11 @@ import { useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity,
   StyleSheet, ActivityIndicator, KeyboardAvoidingView,
-  Platform, ScrollView,
+  Platform, ScrollView, StatusBar,
 } from 'react-native';
+import { Feather } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { login } from '../services/auth';
 
 export default function LoginScreen({ onLoginExitoso }) {
@@ -11,6 +14,7 @@ export default function LoginScreen({ onLoginExitoso }) {
   const [password, setPassword] = useState('');
   const [cargando, setCargando] = useState(false);
   const [error, setError]       = useState('');
+  const insets = useSafeAreaInsets();
 
   async function handleLogin() {
     if (!email.trim() || !password.trim()) {
@@ -35,49 +39,63 @@ export default function LoginScreen({ onLoginExitoso }) {
       style={styles.flex}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+      <StatusBar barStyle="light-content" />
+      <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
 
-        {/* Logo / Header */}
-        <View style={styles.header}>
+        {/* Hero — mismo lenguaje que las otras pantallas */}
+        <View style={[styles.hero, { paddingTop: insets.top + 32 }]}>
+          <MaterialCommunityIcons
+            name="stethoscope"
+            size={160}
+            color="#fff"
+            style={styles.watermark}
+          />
           <View style={styles.logoCircle}>
             <Text style={styles.logoText}>CM</Text>
           </View>
           <Text style={styles.titulo}>Clínica Médica</Text>
-          <Text style={styles.subtitulo}>Acceso de emergencia</Text>
+          <Text style={styles.subtitulo}>Sistema de gestión médica</Text>
         </View>
 
-        {/* Card */}
-        <View style={styles.card}>
+        {/* Formulario */}
+        <View style={styles.cuerpo}>
           <Text style={styles.cardTitulo}>Iniciar sesión</Text>
 
           <View style={styles.campo}>
-            <Text style={styles.label}>Email</Text>
-            <TextInput
-              style={styles.input}
-              value={email}
-              onChangeText={setEmail}
-              placeholder="correo@clinica.gt"
-              placeholderTextColor="#94a3b8"
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoCorrect={false}
-            />
+            <Text style={styles.label}>Correo electrónico</Text>
+            <View style={styles.inputWrap}>
+              <Feather name="mail" size={15} color="#94a3b8" style={styles.inputIcono} />
+              <TextInput
+                style={styles.input}
+                value={email}
+                onChangeText={setEmail}
+                placeholder="correo@clinica.gt"
+                placeholderTextColor="#cbd5e1"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+            </View>
           </View>
 
           <View style={styles.campo}>
             <Text style={styles.label}>Contraseña</Text>
-            <TextInput
-              style={styles.input}
-              value={password}
-              onChangeText={setPassword}
-              placeholder="••••••••"
-              placeholderTextColor="#94a3b8"
-              secureTextEntry
-            />
+            <View style={styles.inputWrap}>
+              <Feather name="lock" size={15} color="#94a3b8" style={styles.inputIcono} />
+              <TextInput
+                style={styles.input}
+                value={password}
+                onChangeText={setPassword}
+                placeholder="••••••••"
+                placeholderTextColor="#cbd5e1"
+                secureTextEntry
+              />
+            </View>
           </View>
 
           {error ? (
             <View style={styles.errorBox}>
+              <Feather name="alert-circle" size={14} color="#dc2626" style={{ marginRight: 8 }} />
               <Text style={styles.errorText}>{error}</Text>
             </View>
           ) : null}
@@ -95,75 +113,86 @@ export default function LoginScreen({ onLoginExitoso }) {
           </TouchableOpacity>
         </View>
 
-        <Text style={styles.pie}>Solo lectura · Acceso de emergencia</Text>
       </ScrollView>
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  flex: { flex: 1, backgroundColor: '#f8fafc' },
-  container: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    paddingHorizontal: 24,
-    paddingVertical: 40,
-  },
-  header: { alignItems: 'center', marginBottom: 32 },
-  logoCircle: {
-    width: 64, height: 64, borderRadius: 32,
-    backgroundColor: '#4f46e5',
-    alignItems: 'center', justifyContent: 'center',
-    marginBottom: 12,
-  },
-  logoText: { color: '#fff', fontSize: 22, fontWeight: '700' },
-  titulo: { fontSize: 22, fontWeight: '700', color: '#0f172a' },
-  subtitulo: { fontSize: 13, color: '#94a3b8', marginTop: 4 },
+  flex:   { flex: 1, backgroundColor: '#f8fafc' },
+  scroll: { flexGrow: 1 },
 
-  card: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 2,
+  hero: {
+    backgroundColor: '#1e293b',
+    alignItems: 'center',
+    paddingBottom: 36,
+    overflow: 'hidden',
   },
-  cardTitulo: { fontSize: 16, fontWeight: '600', color: '#0f172a', marginBottom: 20 },
+  watermark: {
+    position: 'absolute',
+    right: -24,
+    bottom: -32,
+    opacity: 0.07,
+  },
+  logoCircle: {
+    width: 68, height: 68, borderRadius: 34,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderWidth: 1.5,
+    borderColor: 'rgba(255,255,255,0.15)',
+    alignItems: 'center', justifyContent: 'center',
+    marginBottom: 14,
+  },
+  logoText:  { color: '#f1f5f9', fontSize: 24, fontWeight: '700' },
+  titulo:    { fontSize: 22, fontWeight: '700', color: '#f1f5f9' },
+  subtitulo: { fontSize: 13, color: '#64748b', marginTop: 5 },
+
+  cuerpo: {
+    flex: 1,
+    backgroundColor: '#f8fafc',
+    paddingHorizontal: 24,
+    paddingTop: 28,
+    paddingBottom: 40,
+  },
+  cardTitulo: { fontSize: 17, fontWeight: '700', color: '#0f172a', marginBottom: 22 },
 
   campo: { marginBottom: 16 },
-  label: { fontSize: 12, fontWeight: '500', color: '#64748b', marginBottom: 6 },
-  input: {
+  label: { fontSize: 12, fontWeight: '600', color: '#64748b', marginBottom: 7 },
+  inputWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
     borderWidth: 1,
     borderColor: '#e2e8f0',
-    borderRadius: 10,
+    borderRadius: 12,
     paddingHorizontal: 14,
-    paddingVertical: 11,
+  },
+  inputIcono: { marginRight: 10 },
+  input: {
+    flex: 1,
     fontSize: 14,
     color: '#0f172a',
-    backgroundColor: '#fff',
+    paddingVertical: 13,
   },
 
   errorBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: '#fef2f2',
     borderWidth: 1,
     borderColor: '#fecaca',
-    borderRadius: 8,
+    borderRadius: 10,
     padding: 12,
     marginBottom: 16,
   },
-  errorText: { fontSize: 13, color: '#dc2626' },
+  errorText: { fontSize: 13, color: '#dc2626', flex: 1 },
 
   boton: {
-    backgroundColor: '#4f46e5',
-    borderRadius: 10,
-    paddingVertical: 14,
+    backgroundColor: '#1e293b',
+    borderRadius: 12,
+    paddingVertical: 15,
     alignItems: 'center',
-    marginTop: 4,
+    marginTop: 8,
   },
   botonDisabled: { opacity: 0.6 },
-  botonTexto: { color: '#fff', fontSize: 15, fontWeight: '600' },
-
-  pie: { textAlign: 'center', fontSize: 12, color: '#cbd5e1', marginTop: 28 },
+  botonTexto: { color: '#fff', fontSize: 15, fontWeight: '700' },
 });

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, StatusBar } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getUsuario } from '../services/auth';
 
@@ -32,8 +33,14 @@ export default function PerfilScreen({ onLogout }) {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
 
-      {/* Hero header — respeta el notch */}
+      {/* Hero — mismo lenguaje que otras pantallas */}
       <View style={[styles.hero, { paddingTop: insets.top + 24 }]}>
+        <MaterialCommunityIcons
+          name="stethoscope"
+          size={130}
+          color="#fff"
+          style={styles.watermark}
+        />
         <View style={styles.avatar}>
           <Text style={styles.avatarTexto}>{iniciales(usuario.nombre)}</Text>
         </View>
@@ -44,24 +51,22 @@ export default function PerfilScreen({ onLogout }) {
         </View>
       </View>
 
-      {/* Contenido */}
+      {/* Info */}
       <View style={styles.cuerpo}>
-
-        {/* Info básica */}
         <View style={styles.seccion}>
-          <FilaInfo icono="shield" label="Rol en el sistema" valor={rolCfg.label} />
-          <View style={styles.sep} />
-          <FilaInfo icono="hash" label="ID de usuario" valor={`${usuario.id?.slice(0, 8)}…`} />
-          <View style={styles.sep} />
+          {usuario.email && (
+            <>
+              <FilaInfo icono="mail" label="Correo electrónico" valor={usuario.email} />
+              <View style={styles.sep} />
+            </>
+          )}
           <FilaInfo icono="smartphone" label="Aplicación" valor="Clínica Médica · Móvil" />
         </View>
 
-        {/* Cerrar sesión */}
         <TouchableOpacity style={styles.btnCerrar} onPress={onLogout} activeOpacity={0.8}>
           <Feather name="log-out" size={16} color="#ef4444" style={{ marginRight: 10 }} />
           <Text style={styles.btnCerrarTexto}>Cerrar sesión</Text>
         </TouchableOpacity>
-
       </View>
     </View>
   );
@@ -73,9 +78,9 @@ function FilaInfo({ icono, label, valor }) {
       <View style={styles.filaIconoWrap}>
         <Feather name={icono} size={15} color="#64748b" />
       </View>
-      <View>
+      <View style={{ flex: 1 }}>
         <Text style={styles.filaLabel}>{label}</Text>
-        <Text style={styles.filaValor}>{valor}</Text>
+        <Text style={styles.filaValor} numberOfLines={1}>{valor}</Text>
       </View>
     </View>
   );
@@ -85,16 +90,22 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f8fafc' },
 
   hero: {
-    backgroundColor: '#0f172a',
+    backgroundColor: '#1e293b',
     alignItems: 'center',
     paddingBottom: 32,
-    paddingHorizontal: 24,
+    overflow: 'hidden',
+  },
+  watermark: {
+    position: 'absolute',
+    right: -18,
+    bottom: -28,
+    opacity: 0.07,
   },
   avatar: {
     width: 76, height: 76, borderRadius: 38,
-    backgroundColor: '#1e293b',
-    borderWidth: 2,
-    borderColor: '#334155',
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderWidth: 1.5,
+    borderColor: 'rgba(255,255,255,0.12)',
     alignItems: 'center', justifyContent: 'center',
     marginBottom: 14,
   },

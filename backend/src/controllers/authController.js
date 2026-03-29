@@ -78,6 +78,7 @@ async function login(req, res, next) {
       id: usuario.id,
       rol: usuario.rol,
       nombre: usuario.nombreCompleto,
+      email: usuario.email,
     });
   } catch (err) {
     next(err);

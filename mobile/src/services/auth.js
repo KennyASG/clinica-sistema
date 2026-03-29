@@ -5,7 +5,7 @@ export async function login(email, password) {
   const { data } = await api.post('/auth/login', { email, password });
   await AsyncStorage.multiSet([
     ['token', data.token],
-    ['usuario', JSON.stringify({ id: data.id, rol: data.rol, nombre: data.nombre })],
+    ['usuario', JSON.stringify({ id: data.id, rol: data.rol, nombre: data.nombre, email: data.email })],
   ]);
   return data;
 }
