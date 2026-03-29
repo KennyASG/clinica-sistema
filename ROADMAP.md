@@ -115,9 +115,9 @@
 - [x] **RF-27** — Persistencia de sesión con AsyncStorage ✅ 2026-03-27
 
 ### Pruebas Sprint 7-8
-- [ ] Prueba: app en Android muestra alerta de alergia antes de scroll
-- [ ] Prueba: request POST desde app móvil con token válido retorna 403
-- [ ] Prueba: sesión persiste al cerrar y reabrir la app
+- [x] Prueba: app en Android muestra alerta de alergia antes de scroll ✅ 2026-03-28
+- [x] Prueba: request POST desde app móvil con token válido retorna 403 ✅ 2026-03-28
+- [x] Prueba: sesión persiste al cerrar y reabrir la app ✅ 2026-03-28
 
 ---
 
@@ -172,4 +172,4 @@
 
 ---
 
-*Última actualización: 2026-03-26 | Próximo sprint: FASE 0 — Setup inicial*
+*Última actualización: 2026-03-28 | Próximo sprint: Sprint 9 — Reportes, auditoría y catálogos*
