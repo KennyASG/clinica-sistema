@@ -1,11 +1,12 @@
 import { useState, useCallback } from 'react';
 import {
   View, Text, ScrollView, StyleSheet,
-  ActivityIndicator, TouchableOpacity, TextInput, RefreshControl,
+  ActivityIndicator, TouchableOpacity, TextInput, RefreshControl, StatusBar,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import api from '../services/api';
 
 function formatFechaHoy() {
@@ -31,6 +32,7 @@ export default function SignosScreen({ navigation }) {
   const [refresco, setRefresco] = useState(false);
   const [busqueda, setBusqueda] = useState('');
   const [error, setError]       = useState('');
+  const insets = useSafeAreaInsets();
 
   useFocusEffect(
     useCallback(() => {
@@ -81,8 +83,10 @@ export default function SignosScreen({ navigation }) {
 
   return (
     <View style={styles.flex}>
+      <StatusBar barStyle="light-content" />
+
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: insets.top + 20 }]}>
         <MaterialCommunityIcons
           name="stethoscope"
           size={130}
@@ -255,7 +259,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     backgroundColor: '#1e293b',
     paddingHorizontal: 20,
-    paddingVertical: 20,
+    paddingBottom: 20,
     overflow: 'hidden',
   },
   watermark: {

@@ -1,10 +1,11 @@
 import { useState, useCallback, useEffect } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity,
-  FlatList, StyleSheet, ActivityIndicator,
+  FlatList, StyleSheet, ActivityIndicator, StatusBar,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import api from '../services/api';
 import { guardarReciente, obtenerRecientes } from '../utils/recientes';
 import { getUsuario } from '../services/auth';
@@ -28,6 +29,7 @@ export default function BusquedaScreen({ navigation }) {
   const [cargando, setCargando]     = useState(false);
   const [buscado, setBuscado]       = useState(false);
   const [usuario, setUsuario]       = useState(null);
+  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     obtenerRecientes().then(setRecientes);
@@ -74,21 +76,25 @@ export default function BusquedaScreen({ navigation }) {
   return (
     <View style={styles.container}>
 
-      {/* Saludo — solo cuando no hay búsqueda activa */}
-      {query.length < 2 && (
-        <View style={styles.saludoWrap}>
-          <MaterialCommunityIcons
-            name="stethoscope"
-            size={130}
-            color="#fff"
-            style={styles.watermark}
-          />
-          <Text style={styles.saludoTexto}>
-            {saludo()}{primerNombre ? `, ${primerNombre}` : ''}
-          </Text>
-          <Text style={styles.saludoSub}>¿A quién buscas hoy?</Text>
-        </View>
-      )}
+      <StatusBar barStyle="light-content" />
+
+      {/* Saludo — siempre ocupa el espacio del notch; contenido se oculta al buscar */}
+      <View style={[styles.saludoWrap, { paddingTop: insets.top + 18 }]}>
+        <MaterialCommunityIcons
+          name="stethoscope"
+          size={130}
+          color="#fff"
+          style={styles.watermark}
+        />
+        {query.length < 2 && (
+          <>
+            <Text style={styles.saludoTexto}>
+              {saludo()}{primerNombre ? `, ${primerNombre}` : ''}
+            </Text>
+            <Text style={styles.saludoSub}>¿A quién buscas hoy?</Text>
+          </>
+        )}
+      </View>
 
       {/* Search bar */}
       <View style={styles.searchBox}>
@@ -205,7 +211,6 @@ const styles = StyleSheet.create({
   saludoWrap: {
     backgroundColor: '#1e293b',
     paddingHorizontal: 20,
-    paddingTop: 18,
     paddingBottom: 20,
     overflow: 'hidden',
   },

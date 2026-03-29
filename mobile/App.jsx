@@ -33,7 +33,7 @@ function BusquedaStack() {
       <Stack.Screen
         name="BusquedaMain"
         component={BusquedaScreen}
-        options={{ title: 'Buscar paciente' }}
+        options={{ headerShown: false }}
       />
       <Stack.Screen
         name="Expediente"
@@ -52,7 +52,7 @@ function AgendaStack() {
       <Stack.Screen
         name="AgendaMain"
         component={AgendaScreen}
-        options={{ title: 'Mi agenda' }}
+        options={{ headerShown: false }}
       />
       <Stack.Screen
         name="Expediente"
@@ -71,7 +71,7 @@ function SignosStack() {
       <Stack.Screen
         name="SignosMain"
         component={SignosScreen}
-        options={{ title: 'Signos vitales' }}
+        options={{ headerShown: false }}
       />
       <Stack.Screen
         name="RegistrarSignos"
