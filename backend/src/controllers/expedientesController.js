@@ -107,10 +107,12 @@ async function historial(req, res, next) {
         },
         cita: {
           include: {
+            tipoConsulta: { select: { nombre: true } },
             signosVitales: {
               select: {
                 presionArterial: true, temperaturaC: true, pesoKg: true,
                 tallaCm: true, frecuenciaCardiaca: true, saturacionO2: true,
+                glucosaMgdl: true, observaciones: true,
               },
             },
           },

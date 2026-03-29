@@ -80,12 +80,6 @@ export default function ExpedienteScreen({ route }) {
 
   return (
     <View style={styles.flex}>
-      {/* Banner solo lectura — PERMANENTE */}
-      <View style={styles.banner}>
-        <Feather name="lock" size={11} color="#94a3b8" style={{ marginRight: 6 }} />
-        <Text style={styles.bannerTexto}>Solo lectura · Acceso de emergencia</Text>
-      </View>
-
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
 
         {/* Header paciente */}
@@ -200,6 +194,9 @@ function TarjetaConsulta({ consulta: c, primera }) {
         <View style={styles.consultaHeaderLeft}>
           <Text style={styles.consultaFecha}>{formatFecha(c.fechaHora)}</Text>
           <Text style={styles.consultaMedico}>Dr. {c.medico?.nombreCompleto}</Text>
+          {c.cita?.tipoConsulta?.nombre && (
+            <Text style={styles.consultaTipo}>{c.cita.tipoConsulta.nombre}</Text>
+          )}
         </View>
         <View style={styles.consultaHeaderRight}>
           {(c.diagnosticoCie10 || c.diagnosticoDescripcion) && (
@@ -208,6 +205,12 @@ function TarjetaConsulta({ consulta: c, primera }) {
               {c.diagnosticoDescripcion && (
                 <Text style={styles.diagnosticoDesc} numberOfLines={1}>{c.diagnosticoDescripcion}</Text>
               )}
+            </View>
+          )}
+          {c.cita?.signosVitales && (
+            <View style={styles.svIndicador}>
+              <Feather name="activity" size={10} color="#16a34a" style={{ marginRight: 3 }} />
+              <Text style={styles.svIndicadorTexto}>Signos registrados</Text>
             </View>
           )}
         </View>
@@ -259,11 +262,12 @@ function SignosVitales({ sv }) {
   if (!sv) return null;
 
   const items = [
-    { icon: 'activity',    label: 'PA',     valor: sv.presionArterial,                        unidad: '' },
-    { icon: 'thermometer', label: 'Temp',   valor: sv.temperaturaC != null ? sv.temperaturaC  : null, unidad: '°C' },
-    { icon: 'heart',       label: 'FC',     valor: sv.frecuenciaCardiaca,                      unidad: 'lpm' },
-    { icon: 'wind',        label: 'SpO2',   valor: sv.saturacionO2,                            unidad: '%' },
-    { icon: 'user',        label: 'Peso',   valor: sv.pesoKg != null ? sv.pesoKg              : null, unidad: 'kg' },
+    { icon: 'activity',    label: 'PA',      valor: sv.presionArterial,                               unidad: ''     },
+    { icon: 'thermometer', label: 'Temp',    valor: sv.temperaturaC    != null ? sv.temperaturaC    : null, unidad: '°C'   },
+    { icon: 'heart',       label: 'FC',      valor: sv.frecuenciaCardiaca,                            unidad: 'lpm'  },
+    { icon: 'wind',        label: 'SpO2',    valor: sv.saturacionO2,                                  unidad: '%'    },
+    { icon: 'user',        label: 'Peso',    valor: sv.pesoKg          != null ? sv.pesoKg          : null, unidad: 'kg'   },
+    { icon: 'bar-chart-2', label: 'Glucosa', valor: sv.glucosaMgdl     != null ? sv.glucosaMgdl     : null, unidad: 'mg/dL'},
   ].filter(i => i.valor != null && i.valor !== '');
 
   if (items.length === 0) return null;
@@ -283,6 +287,9 @@ function SignosVitales({ sv }) {
           </View>
         ))}
       </View>
+      {sv.observaciones ? (
+        <Text style={styles.svObs}>{sv.observaciones}</Text>
+      ) : null}
     </View>
   );
 }
@@ -310,17 +317,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#4f46e5', borderRadius: 8,
   },
   reintentarText: { color: '#fff', fontWeight: '600' },
-
-  // Banner solo lectura
-  banner: {
-    backgroundColor: '#1e293b',
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  bannerTexto: { color: '#94a3b8', fontSize: 12, fontWeight: '500' },
 
   // Header paciente
   headerCard: {
@@ -440,8 +436,15 @@ const styles = StyleSheet.create({
   consultaHeaderRight: {
     flex: 1,
   },
-  consultaFecha: { fontSize: 12, fontWeight: '600', color: '#4f46e5' },
+  consultaFecha:  { fontSize: 12, fontWeight: '600', color: '#4f46e5' },
   consultaMedico: { fontSize: 11, color: '#94a3b8', marginTop: 2 },
+  consultaTipo:   { fontSize: 11, color: '#a5b4fc', marginTop: 1 },
+
+  svIndicador: {
+    flexDirection: 'row', alignItems: 'center',
+    marginTop: 4,
+  },
+  svIndicadorTexto: { fontSize: 10, color: '#16a34a', fontWeight: '500' },
   consultaMotivo: { fontSize: 14, color: '#0f172a', lineHeight: 20, marginBottom: 6 },
   diagnosticoRow: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 6, marginBottom: 2 },
 
@@ -487,4 +490,5 @@ const styles = StyleSheet.create({
   },
   svLabel: { fontSize: 11, color: '#94a3b8' },
   svValor: { fontSize: 11, fontWeight: '600', color: '#334155' },
+  svObs:   { fontSize: 11, color: '#64748b', marginTop: 6, fontStyle: 'italic' },
 });
