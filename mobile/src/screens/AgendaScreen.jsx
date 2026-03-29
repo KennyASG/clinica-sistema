@@ -4,6 +4,7 @@ import {
   ActivityIndicator, TouchableOpacity, RefreshControl,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import api from '../services/api';
 import { getUsuario } from '../services/auth';
@@ -101,6 +102,12 @@ export default function AgendaScreen({ navigation }) {
     >
       {/* Header */}
       <View style={styles.header}>
+        <MaterialCommunityIcons
+          name="stethoscope"
+          size={130}
+          color="#fff"
+          style={styles.watermark}
+        />
         <View>
           <Text style={styles.saludo}>Dr. {usuario?.nombre?.split(' ')[0]}</Text>
           <Text style={styles.fecha}>{formatFechaLarga()}</Text>
@@ -194,23 +201,30 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#fff',
+    backgroundColor: '#1e293b',
     paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f1f5f9',
+    paddingVertical: 20,
+    overflow: 'hidden',
   },
-  saludo: { fontSize: 17, fontWeight: '700', color: '#0f172a' },
-  fecha:  { fontSize: 13, color: '#94a3b8', marginTop: 2, textTransform: 'capitalize' },
+  watermark: {
+    position: 'absolute',
+    right: -18,
+    bottom: -28,
+    opacity: 0.07,
+  },
+  saludo: { fontSize: 17, fontWeight: '700', color: '#f1f5f9' },
+  fecha:  { fontSize: 13, color: '#64748b', marginTop: 2, textTransform: 'capitalize' },
   contadorBadge: {
     alignItems: 'center',
-    backgroundColor: '#eef2ff',
+    backgroundColor: 'rgba(255,255,255,0.08)',
     borderRadius: 12,
     paddingHorizontal: 14,
     paddingVertical: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
   },
-  contadorNum:   { fontSize: 20, fontWeight: '700', color: '#4f46e5' },
-  contadorLabel: { fontSize: 11, color: '#6366f1', marginTop: 1 },
+  contadorNum:   { fontSize: 20, fontWeight: '700', color: '#f1f5f9' },
+  contadorLabel: { fontSize: 11, color: '#64748b', marginTop: 1 },
 
   errorBox: {
     margin: 16, padding: 14,

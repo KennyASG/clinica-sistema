@@ -4,8 +4,15 @@ import {
   ActivityIndicator, TouchableOpacity, TextInput, RefreshControl,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import api from '../services/api';
+
+function formatFechaHoy() {
+  return new Date().toLocaleDateString('es-GT', {
+    weekday: 'long', day: 'numeric', month: 'long',
+  });
+}
 
 function formatHora(fechaStr) {
   return new Date(fechaStr).toLocaleTimeString('es-GT', { hour: '2-digit', minute: '2-digit' });
@@ -70,8 +77,30 @@ export default function SignosScreen({ navigation }) {
     );
   }
 
+  const pendientesCount = citas.filter(c => !c.signosVitales && !['atendida','cancelada','no_presentada'].includes(c.estado)).length;
+
   return (
     <View style={styles.flex}>
+      {/* Header */}
+      <View style={styles.header}>
+        <MaterialCommunityIcons
+          name="stethoscope"
+          size={130}
+          color="#fff"
+          style={styles.watermark}
+        />
+        <View>
+          <Text style={styles.headerTitulo}>Signos vitales</Text>
+          <Text style={styles.headerFecha}>{formatFechaHoy()}</Text>
+        </View>
+        {pendientesCount > 0 && (
+          <View style={styles.pendienteBadge}>
+            <Text style={styles.pendienteNum}>{pendientesCount}</Text>
+            <Text style={styles.pendienteLabel}>pendientes</Text>
+          </View>
+        )}
+      </View>
+
       {/* Buscador */}
       <View style={styles.searchWrap}>
         <Feather name="search" size={15} color="#94a3b8" style={styles.searchIcon} />
@@ -219,6 +248,35 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: 16, paddingTop: 12 },
 
   centro: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#1e293b',
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+    overflow: 'hidden',
+  },
+  watermark: {
+    position: 'absolute',
+    right: -18,
+    bottom: -28,
+    opacity: 0.07,
+  },
+  headerTitulo: { fontSize: 17, fontWeight: '700', color: '#f1f5f9' },
+  headerFecha:  { fontSize: 13, color: '#64748b', marginTop: 2, textTransform: 'capitalize' },
+  pendienteBadge: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+  },
+  pendienteNum:   { fontSize: 20, fontWeight: '700', color: '#f1f5f9' },
+  pendienteLabel: { fontSize: 11, color: '#64748b', marginTop: 1 },
 
   searchWrap: {
     flexDirection: 'row',

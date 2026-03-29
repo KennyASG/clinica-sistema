@@ -4,6 +4,7 @@ import {
   FlatList, StyleSheet, ActivityIndicator,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import api from '../services/api';
 import { guardarReciente, obtenerRecientes } from '../utils/recientes';
 import { getUsuario } from '../services/auth';
@@ -76,6 +77,12 @@ export default function BusquedaScreen({ navigation }) {
       {/* Saludo — solo cuando no hay búsqueda activa */}
       {query.length < 2 && (
         <View style={styles.saludoWrap}>
+          <MaterialCommunityIcons
+            name="stethoscope"
+            size={130}
+            color="#fff"
+            style={styles.watermark}
+          />
           <Text style={styles.saludoTexto}>
             {saludo()}{primerNombre ? `, ${primerNombre}` : ''}
           </Text>
@@ -196,15 +203,20 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f8fafc' },
 
   saludoWrap: {
-    backgroundColor: '#fff',
+    backgroundColor: '#1e293b',
     paddingHorizontal: 20,
     paddingTop: 18,
-    paddingBottom: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f1f5f9',
+    paddingBottom: 20,
+    overflow: 'hidden',
   },
-  saludoTexto: { fontSize: 20, fontWeight: '700', color: '#0f172a' },
-  saludoSub:   { fontSize: 13, color: '#94a3b8', marginTop: 2 },
+  watermark: {
+    position: 'absolute',
+    right: -18,
+    bottom: -28,
+    opacity: 0.07,
+  },
+  saludoTexto: { fontSize: 21, fontWeight: '700', color: '#f1f5f9' },
+  saludoSub:   { fontSize: 13, color: '#64748b', marginTop: 3 },
 
   searchBox: {
     backgroundColor: '#fff',
