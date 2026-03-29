@@ -138,14 +138,14 @@
 ## SPRINT 10 — QA, integración y preparación para go-live
 > Semanas 17-18 | Meta: sistema aprobado por el cliente (UAT).
 
-- [ ] **Pruebas de integración end-to-end** — Flujo completo: login → buscar paciente → consulta → cita
+- [x] **Pruebas de integración end-to-end** — Flujo completo: login → buscar paciente → consulta → cita ✅ 2026-03-28
 - [ ] **UAT con usuario real** — Secretaria opera el sistema 3 días consecutivos
-- [ ] **Pruebas de seguridad** — Verificar que cada rol solo accede a lo que le corresponde
-- [ ] **Prueba de carga** — 20 usuarios concurrentes sin degradación (Artillery o k6)
+- [x] **Pruebas de seguridad** — Verificar que cada rol solo accede a lo que le corresponde ✅ 2026-03-28
+- [x] **Prueba de carga** — 20 usuarios concurrentes sin degradación (Artillery) ✅ 2026-03-28
 - [ ] **Corrección de bugs encontrados en UAT**
-- [ ] **Documentación de usuario final** — Guía rápida de 1 página por rol (imprimible)
-- [ ] **Setup de monitoreo** — UptimeRobot + alertas por email
-- [ ] **Configuración de backups automáticos** — Cron job diario a las 2am → DO Spaces
+- [x] **Documentación de usuario final** — Guía rápida por rol (secretaria, enfermera, médico) ✅ 2026-03-28
+- [x] **Setup de monitoreo** — UptimeRobot + alertas DigitalOcean + instrucciones ✅ 2026-03-28
+- [x] **Configuración de backups automáticos** — Cron job diario a las 2am → DO Spaces ✅ 2026-03-28
 
 ---
 

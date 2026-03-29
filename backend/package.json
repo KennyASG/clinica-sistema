@@ -20,6 +20,10 @@
   "prisma": {
     "seed": "node prisma/seed.js"
   },
+  "jest": {
+    "testEnvironment": "node",
+    "testTimeout": 30000
+  },
   "type": "commonjs",
   "dependencies": {
     "@prisma/client": "^5.22.0",

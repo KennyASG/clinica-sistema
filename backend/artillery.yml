@@ -1,0 +1,73 @@
+config:
+  target: "http://localhost:3000"
+  phases:
+    # Ramp-up: de 0 a 20 usuarios en 30s
+    - duration: 30
+      arrivalRate: 1
+      rampTo: 20
+      name: "Ramp-up"
+    # Carga sostenida: 20 usuarios concurrentes por 60s
+    - duration: 60
+      arrivalRate: 20
+      name: "Carga sostenida"
+  variables:
+    # Token de un usuario con rol médico o secretaria
+    # Reemplazar con token real antes de ejecutar:
+    #   export TOKEN=$(curl -s -X POST localhost:3000/api/auth/login \
+    #     -H 'Content-Type: application/json' \
+    #     -d '{"email":"dr.garcia@clinica.gt","password":"Medico1234!"}' | jq -r .token)
+    token: "REEMPLAZAR_CON_TOKEN_REAL"
+
+  defaults:
+    headers:
+      Authorization: "Bearer {{ token }}"
+      Content-Type: "application/json"
+
+  # Objetivo: p95 < 500ms
+  ensure:
+    p95: 500
+    p99: 1000
+
+scenarios:
+  # Escenario 1: Búsqueda de pacientes (flujo más frecuente)
+  - name: "Buscar paciente por nombre"
+    weight: 60
+    flow:
+      - get:
+          url: "/api/pacientes?q=garcia"
+          expect:
+            - statusCode: 200
+      - get:
+          url: "/api/pacientes?q=sanchez"
+          expect:
+            - statusCode: 200
+      - get:
+          url: "/api/pacientes?q=lopez"
+          expect:
+            - statusCode: 200
+
+  # Escenario 2: Ver agenda del día
+  - name: "Ver agenda de citas del día"
+    weight: 25
+    flow:
+      - get:
+          url: "/api/citas?fecha={{ $processEnvironment.TODAY || '2026-03-28' }}"
+          expect:
+            - statusCode: 200
+
+  # Escenario 3: Catálogos (muy frecuente al abrir formularios)
+  - name: "Cargar catálogos"
+    weight: 15
+    flow:
+      - get:
+          url: "/api/medicos"
+          expect:
+            - statusCode: 200
+      - get:
+          url: "/api/especialidades"
+          expect:
+            - statusCode: 200
+      - get:
+          url: "/api/tipo-consultas"
+          expect:
+            - statusCode: 200
