@@ -102,4 +102,18 @@ async function logout(req, res, next) {
   }
 }
 
-module.exports = { login, logout };
+// POST /api/auth/refresh — emite un nuevo token para el usuario autenticado
+async function refresh(req, res, next) {
+  try {
+    const token = jwt.sign(
+      { id: req.user.id, rol: req.user.rol },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRES_IN || '30m' }
+    );
+    return res.json({ token });
+  } catch (err) {
+    next(err);
+  }
+}
+
+module.exports = { login, logout, refresh };

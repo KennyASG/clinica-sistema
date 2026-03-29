@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Mail, Lock, Eye, EyeOff, Activity } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, Activity, Stethoscope } from 'lucide-react';
 
 const RUTA_POR_ROL = {
   administrador: '/admin/usuarios',
@@ -109,32 +109,33 @@ export default function LoginPage() {
           </form>
         </div>
 
-        {/* Panel derecho — ilustración */}
-        <div className="hidden md:flex w-80 bg-indigo-600 flex-col items-center justify-center px-8 text-center gap-7">
-          <div className="relative">
-            <div className="w-24 h-24 rounded-full bg-white/10 flex items-center justify-center">
-              <div className="w-16 h-16 rounded-full bg-white/15 flex items-center justify-center">
-                <Activity className="w-8 h-8 text-white" strokeWidth={1.5} />
-              </div>
-            </div>
-            <div className="absolute -top-1 right-0 w-3 h-3 bg-indigo-300 rounded-full" />
-            <div className="absolute bottom-0 -left-2 w-2 h-2 bg-indigo-200 rounded-full opacity-70" />
-          </div>
+        {/* Panel derecho */}
+        <div className="hidden md:flex w-80 bg-slate-800 flex-col items-center justify-center px-8 text-center gap-7 relative overflow-hidden">
 
-          <div>
+          {/* Estetoscopio marca de agua */}
+          <Stethoscope
+            className="absolute -right-8 -bottom-8 text-white opacity-[0.06]"
+            style={{ width: 220, height: 220 }}
+            strokeWidth={1}
+          />
+
+          <div className="relative z-10">
+            <div className="w-20 h-20 rounded-full bg-white/8 border border-white/10 flex items-center justify-center mx-auto mb-6">
+              <Stethoscope className="w-9 h-9 text-slate-300" strokeWidth={1.5} />
+            </div>
             <h2 className="text-white font-bold text-lg leading-snug">
               Sistema de Gestión Clínica
             </h2>
-            <p className="text-indigo-200 text-xs mt-2 leading-relaxed">
+            <p className="text-slate-400 text-xs mt-2 leading-relaxed">
               Expedientes digitales, citas y seguimiento de pacientes en un solo lugar.
             </p>
           </div>
 
-          <div className="flex flex-col gap-2 w-full">
+          <div className="flex flex-col gap-2 w-full relative z-10">
             {['Expedientes digitales', 'Control de citas', 'Historial médico'].map(item => (
               <div
                 key={item}
-                className="bg-white/10 rounded-lg px-3 py-2 text-xs text-indigo-100 font-medium text-left"
+                className="bg-white/8 border border-white/10 rounded-lg px-3 py-2 text-xs text-slate-300 font-medium text-left"
               >
                 {item}
               </div>
