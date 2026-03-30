@@ -107,10 +107,12 @@ async function historial(req, res, next) {
         },
         cita: {
           include: {
+            tipoConsulta: { select: { nombre: true } },
             signosVitales: {
               select: {
                 presionArterial: true, temperaturaC: true, pesoKg: true,
                 tallaCm: true, frecuenciaCardiaca: true, saturacionO2: true,
+                glucosaMgdl: true, observaciones: true,
               },
             },
           },
@@ -125,4 +127,26 @@ async function historial(req, res, next) {
   }
 }
 
-module.exports = { obtener, editar, metodNoPermitido, historial };
+// GET /api/expedientes/recientes — últimos 8 expedientes modificados
+async function recientes(req, res, next) {
+  try {
+    const expedientes = await prisma.expediente.findMany({
+      where: { activo: true },
+      orderBy: { actualizadoEn: 'desc' },
+      take: 8,
+      select: {
+        id: true,
+        tieneAlergias: true,
+        actualizadoEn: true,
+        paciente: {
+          select: { id: true, nombreCompleto: true, sexo: true, fechaNacimiento: true },
+        },
+      },
+    });
+    return res.json(expedientes);
+  } catch (err) {
+    next(err);
+  }
+}
+
+module.exports = { obtener, editar, metodNoPermitido, historial, recientes };

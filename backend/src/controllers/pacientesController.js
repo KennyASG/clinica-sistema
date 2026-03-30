@@ -4,7 +4,7 @@ const { Prisma } = require('@prisma/client');
 const prisma = require('../utils/prismaClient');
 const errorResponse = require('../utils/errorResponse');
 const registrarAuditoria = require('../utils/auditoria');
-const { crearPacienteSchema } = require('../validators/pacientes');
+const { crearPacienteSchema, editarPacienteSchema } = require('../validators/pacientes');
 
 // GET /api/pacientes?q= — RF-09
 // Búsqueda difusa por nombre (pg_trgm) o exacta por DPI
@@ -129,4 +129,41 @@ async function obtener(req, res, next) {
   }
 }
 
-module.exports = { buscar, crear, obtener };
+// PATCH /api/pacientes/:id — editar datos de contacto del paciente
+async function editar(req, res, next) {
+  try {
+    const parsed = editarPacienteSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(422).json(errorResponse(parsed.error.issues[0].message, 'VALIDATION_ERROR'));
+    }
+
+    const paciente = await prisma.paciente.findUnique({ where: { id: req.params.id } });
+    if (!paciente) return res.status(404).json(errorResponse('Paciente no encontrado', 'NOT_FOUND'));
+
+    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+
+    const actualizado = await prisma.$transaction(async (tx) => {
+      const p = await tx.paciente.update({
+        where: { id: req.params.id },
+        data: parsed.data,
+      });
+      await registrarAuditoria(tx, {
+        usuarioId: req.user.id,
+        accion: 'UPDATE',
+        tablaAfectada: 'paciente',
+        registroId: p.id,
+        datosAnteriores: { telefono: paciente.telefono, correo: paciente.correo },
+        datosNuevos: parsed.data,
+        ip,
+        userAgent: req.headers['user-agent'],
+      });
+      return p;
+    });
+
+    return res.json(actualizado);
+  } catch (err) {
+    next(err);
+  }
+}
+
+module.exports = { buscar, crear, obtener, editar };

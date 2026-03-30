@@ -4,26 +4,16 @@
     "slug": "clinica-medica",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "gt.clinica.medica"
     },
     "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      },
       "package": "gt.clinica.medica"
     },
     "extra": {
-      "apiUrl": "https://api.clinica.gt"
+      "apiUrl": "http://172.20.10.2:3000"
     }
   }
 }

@@ -1,7 +1,7 @@
 'use strict';
 
 const { Router } = require('express');
-const { buscar, crear, obtener } = require('../controllers/pacientesController');
+const { buscar, crear, obtener, editar } = require('../controllers/pacientesController');
 const authMiddleware = require('../middlewares/authMiddleware');
 
 const router = Router();
@@ -15,5 +15,8 @@ router.post('/', crear);
 
 // GET /api/pacientes/:id  — detalle con expediente
 router.get('/:id', obtener);
+
+// PATCH /api/pacientes/:id — editar datos de contacto
+router.patch('/:id', editar);
 
 module.exports = router;

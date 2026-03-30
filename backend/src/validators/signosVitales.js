@@ -3,7 +3,7 @@
 const { z } = require('zod');
 
 const crearSignosVitalesSchema = z.object({
-  citaId:            z.string().uuid('ID de cita inválido'),
+  citaId:            z.uuid('ID de cita inválido'),
   presionArterial:   z.string().max(10).optional(),
   temperaturaC:      z.number().min(30).max(45).optional(),
   pesoKg:            z.number().positive().optional(),

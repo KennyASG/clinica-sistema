@@ -6,21 +6,23 @@ const ROLES = ['administrador', 'medico', 'enfermera', 'secretaria'];
 
 const crearUsuarioSchema = z.object({
   nombreCompleto: z.string().min(2, 'Nombre requerido').max(200),
-  email: z.string().email('Email inválido'),
+  email: z.email('Email inválido'),
   password: z.string().min(8, 'La contraseña debe tener al menos 8 caracteres'),
-  rol: z.enum(ROLES, { error: 'Rol inválido' }),
+  rol: z.enum(ROLES, { message: 'Rol inválido' }),
   numeroColegiado: z.string().max(20).optional(),
   telefono: z.string().max(20).optional(),
+  especialidadIds: z.array(z.uuid()).optional(),
 });
 
 const editarUsuarioSchema = z.object({
   nombreCompleto: z.string().min(2).max(200).optional(),
-  email: z.string().email().optional(),
+  email: z.email().optional(),
   password: z.string().min(8).optional(),
   rol: z.enum(ROLES).optional(),
   numeroColegiado: z.string().max(20).optional(),
   telefono: z.string().max(20).optional(),
   activo: z.boolean().optional(),
+  especialidadIds: z.array(z.uuid()).optional(),
 });
 
 module.exports = { crearUsuarioSchema, editarUsuarioSchema };

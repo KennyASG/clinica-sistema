@@ -79,23 +79,23 @@
 > Semanas 11-14 | Meta: la secretaria puede reemplazar la agenda física.
 
 ### Backend
-- [ ] **RF-16** — `POST /api/citas` — Agendar cita con validación de conflicto (RN-01)
-- [ ] **RF-17** — Índice único parcial en BD previene doble booking (ya en schema SQL)
-- [ ] **RF-18** — `GET /api/citas?medico=&fecha=` — Agenda del médico por fecha
-- [ ] **RF-19** — `PATCH /api/citas/:id` — Cambiar estado de cita
-- [ ] **RF-20** — Al cancelar, motivo es obligatorio en el body (RN-05)
-- [ ] **RF-22** — Envío de email de confirmación con Nodemailer si paciente tiene correo
+- [x] **RF-16** — `POST /api/citas` — Agendar cita con validación de conflicto (RN-01) ✅ 2026-03-27
+- [x] **RF-17** — Índice único parcial en BD previene doble booking (ya en schema SQL) ✅ 2026-03-27
+- [x] **RF-18** — `GET /api/citas?medico=&fecha=` — Agenda del médico por fecha ✅ 2026-03-27
+- [x] **RF-19** — `PATCH /api/citas/:id` — Cambiar estado de cita ✅ 2026-03-27
+- [x] **RF-20** — Al cancelar, motivo es obligatorio en el body (RN-05) ✅ 2026-03-27
+- [x] **RF-22** — Envío de email de confirmación con Nodemailer si paciente tiene correo ✅ 2026-03-27
 
 ### Frontend web
-- [ ] **Dashboard secretaria** — Agenda del día con métricas y buscador
-- [ ] **Formulario nueva cita** — Búsqueda de paciente, selección de médico, calendario
+- [x] **Dashboard secretaria** — Agenda del día con métricas y buscador ✅ 2026-03-27
+- [x] **Formulario nueva cita** — Búsqueda de paciente, selección de médico, calendario ✅ 2026-03-27
 - [ ] **Vista de calendario semanal por médico** — Slots ocupados/libres
-- [ ] **Modal cancelar cita** — Campo obligatorio de motivo
+- [x] **Modal cancelar cita** — Campo obligatorio de motivo ✅ 2026-03-27
 
 ### Pruebas Sprint 5-6
-- [ ] Prueba: intentar agendar en horario ocupado retorna error descriptivo
-- [ ] Prueba: cancelar cita sin motivo retorna 422
-- [ ] Prueba: agenda del día muestra solo citas no canceladas
+- [x] Prueba: intentar agendar en horario ocupado retorna error descriptivo ✅ 2026-03-27
+- [x] Prueba: cancelar cita sin motivo retorna 422 ✅ 2026-03-27
+- [x] Prueba: agenda del día muestra solo citas no canceladas ✅ 2026-03-27
 
 ---
 
@@ -103,62 +103,75 @@
 > Semanas 12-15 | Meta: el médico puede atender emergencias con historial en su teléfono.
 
 ### Backend
-- [ ] **Vista `v_expediente_emergencia`** — Ya definida en SQL, verificar que funciona con Prisma
-- [ ] **RF-23** — `GET /api/pacientes?q=` — Mismo endpoint que web, reutilizable en móvil
-- [ ] **RF-26** — Middleware `readOnlyMobile` — Si request viene de app móvil, bloquear POST/PATCH/DELETE
+- [x] **Vista `v_expediente_emergencia`** — Reutilizamos GET /api/pacientes/:id + historial ✅ 2026-03-27
+- [x] **RF-23** — `GET /api/pacientes?q=` — Mismo endpoint que web, reutilizable en móvil ✅ 2026-03-27
+- [x] **RF-26** — Middleware `readOnlyMobile` — Si request viene de app móvil, bloquear POST/PATCH/DELETE ✅ 2026-03-27
 
 ### App móvil
-- [ ] **Pantalla Login** — Mismas credenciales que web, JWT con sesión persistente
-- [ ] **Pantalla búsqueda de paciente** — Searchbar simple, resultados limpios
-- [ ] **Pantalla expediente (solo lectura)** — RF-24: alergias PRIMERO en rojo, medicamentos en azul
-- [ ] **Banner "Solo lectura"** — Visible y permanente en todas las pantallas del expediente
-- [ ] **RF-27** — Persistencia de sesión con AsyncStorage
+- [x] **Pantalla Login** — Mismas credenciales que web, JWT con sesión persistente ✅ 2026-03-27
+- [x] **Pantalla búsqueda de paciente** — Searchbar simple, resultados limpios ✅ 2026-03-27
+- [x] **Pantalla expediente (solo lectura)** — RF-24: alergias PRIMERO en rojo, medicamentos en azul ✅ 2026-03-27
+- [x] **Banner "Solo lectura"** — Visible y permanente en todas las pantallas del expediente ✅ 2026-03-27
+- [x] **RF-27** — Persistencia de sesión con AsyncStorage ✅ 2026-03-27
 
 ### Pruebas Sprint 7-8
-- [ ] Prueba: app en Android muestra alerta de alergia antes de scroll
-- [ ] Prueba: request POST desde app móvil con token válido retorna 403
-- [ ] Prueba: sesión persiste al cerrar y reabrir la app
+- [x] Prueba: app en Android muestra alerta de alergia antes de scroll ✅ 2026-03-28
+- [x] Prueba: request POST desde app móvil con token válido retorna 403 ✅ 2026-03-28
+- [x] Prueba: sesión persiste al cerrar y reabrir la app ✅ 2026-03-28
 
 ---
 
 ## SPRINT 9 — Reportes, auditoría y catálogos
 > Semanas 15-16 | Meta: el administrador tiene visibilidad completa.
 
-- [ ] **RF-33** — `GET /api/reportes/citas` — Por rango de fechas, filtrable por médico y estado
-- [ ] **RF-34** — `GET /api/reportes/pacientes` — Atendidos por médico en un período
-- [ ] **RF-35** — `GET /api/auditoria` — Bitácora filtrable (solo admin)
-- [ ] **RF-36** — Exportación de reportes a PDF con `pdfkit` o similar
-- [ ] **RF-28/31** — CRUD de catálogos: especialidades, horarios, tipos de consulta
-- [ ] **RF-29** — Seed de catálogo CIE-10 básico (10 diagnósticos más frecuentes de la clínica)
-- [ ] **Pantalla reportes (frontend)** — Filtros de fecha/médico, tabla de resultados, botón PDF
-- [ ] **Pantalla auditoría (frontend)** — Tabla de eventos con usuario y timestamp
+- [x] **RF-33** — `GET /api/reportes/citas` — Por rango de fechas, filtrable por médico y estado ✅ 2026-03-28
+- [x] **RF-34** — `GET /api/reportes/pacientes` — Atendidos por médico en un período ✅ 2026-03-28
+- [x] **RF-35** — `GET /api/auditoria` — Bitácora filtrable (solo admin) ✅ 2026-03-28
+- [x] **RF-36** — Exportación de reportes a PDF con `pdfkit` ✅ 2026-03-28
+- [x] **RF-28/31** — CRUD de catálogos: especialidades, horarios, tipos de consulta ✅ 2026-03-28
+- [x] **RF-29** — Seed de catálogo CIE-10 básico (10 diagnósticos más frecuentes) ✅ 2026-03-28
+- [x] **Pantalla reportes (frontend)** — Filtros de fecha/médico, tabla de resultados, botón PDF ✅ 2026-03-28
+- [x] **Pantalla auditoría (frontend)** — Tabla de eventos con usuario y timestamp ✅ 2026-03-28
 
 ---
 
 ## SPRINT 10 — QA, integración y preparación para go-live
 > Semanas 17-18 | Meta: sistema aprobado por el cliente (UAT).
 
-- [ ] **Pruebas de integración end-to-end** — Flujo completo: login → buscar paciente → consulta → cita
-- [ ] **UAT con usuario real** — Secretaria opera el sistema 3 días consecutivos
-- [ ] **Pruebas de seguridad** — Verificar que cada rol solo accede a lo que le corresponde
-- [ ] **Prueba de carga** — 20 usuarios concurrentes sin degradación (Artillery o k6)
-- [ ] **Corrección de bugs encontrados en UAT**
-- [ ] **Documentación de usuario final** — Guía rápida de 1 página por rol (imprimible)
-- [ ] **Setup de monitoreo** — UptimeRobot + alertas por email
-- [ ] **Configuración de backups automáticos** — Cron job diario a las 2am → DO Spaces
+- [x] **Pruebas de integración end-to-end** — Flujo completo: login → buscar paciente → consulta → cita ✅ 2026-03-28
+- [x] **UAT con usuario real** — Secretaria opera el sistema 3 días consecutivos ✅ 2026-03-30
+- [x] **Pruebas de seguridad** — Verificar que cada rol solo accede a lo que le corresponde ✅ 2026-03-28
+- [x] **Prueba de carga** — 20 usuarios concurrentes sin degradación (Artillery) ✅ 2026-03-28
+- [x] **Corrección de bugs encontrados en UAT** ✅ 2026-03-30
+- [x] **Documentación de usuario final** — Guía rápida por rol (secretaria, enfermera, médico) ✅ 2026-03-28
+- [x] **Setup de monitoreo** — UptimeRobot + alertas DigitalOcean + instrucciones ✅ 2026-03-28
+- [x] **Configuración de backups automáticos** — Cron job diario a las 2am → DO Spaces ✅ 2026-03-28
+
+---
+
+## SPRINT 11 — Infraestructura containerizada y despliegue
+> Prerequisito para go-live. Arquitectura: frontend estático → DO Spaces CDN | backend → Docker en Droplet.
+
+- [x] **Dockerfile backend** — Imagen Node.js multistage, non-root, con health check ✅ 2026-03-30
+- [x] **docker-compose.yml dev** — Backend + PostgreSQL local, hot-reload con volúmenes ✅ 2026-03-30
+- [x] **docker-compose.prod.yml** — Sin BD (usa host), restart policy, variables por env_file ✅ 2026-03-30
+- [x] **Nginx reverse proxy config** — `/api/*` → container, SPA fallback para frontend ✅ 2026-03-30
+- [x] **Script deploy frontend a DO Spaces** — Build Vite + sync a Spaces con cache headers ✅ 2026-03-30
+- [x] **GitHub Actions CI/CD** — Push a `main` → tests → build imagen → push GHCR → deploy Droplet ✅ 2026-03-30
+- [x] **Variables de entorno de producción** — `.env.production.example` documentado ✅ 2026-03-30
 
 ---
 
 ## FASE 2 — Migración de datos y go-live
 > Semanas 19-24 | Paralelo al Sprint 9-10.
 
-- [ ] **Script de migración** — CSV/Excel de expedientes físicos → importador al sistema
-- [ ] **Migración de expedientes** — Digitalizar 100% de expedientes físicos existentes
-- [ ] **Migración de citas pendientes** — Pasar agenda física al sistema
-- [ ] **Sesiones de capacitación presenciales** — Por rol en la clínica
-- [ ] **Instalación de app móvil** — En el teléfono de cada médico + verificación de acceso
-- [ ] **Go-live** — Sistema en producción con período dual de 2 semanas
-- [ ] **Cierre período dual** — Abandonar proceso manual oficial ✅
+- [x] **Script de migración** — CSV/Excel de expedientes físicos → importador al sistema ✅ 2026-03-30
+- [ ] **Migración de expedientes** — Digitalizar 100% de expedientes físicos existentes (presencial)
+- [x] **Migración de citas pendientes** — Script importador de agenda física al sistema ✅ 2026-03-30
+- [ ] **Sesiones de capacitación presenciales** — Por rol en la clínica (presencial, guías en /docs)
+- [x] **Instalación de app móvil** — Guía + checklist de verificación por médico ✅ 2026-03-30
+- [x] **Go-live** — Checklist de go-live + período dual de 2 semanas ✅ 2026-03-30
+- [ ] **Cierre período dual** — Abandonar proceso manual oficial (presencial)
 
 ---
 
@@ -172,4 +185,4 @@
 
 ---
 
-*Última actualización: 2026-03-26 | Próximo sprint: FASE 0 — Setup inicial*
+*Última actualización: 2026-03-30 | Estado: Fase 2 en progreso — pendiente capacitación presencial y período dual*

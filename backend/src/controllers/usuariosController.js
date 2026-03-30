@@ -8,6 +8,15 @@ const { crearUsuarioSchema, editarUsuarioSchema } = require('../validators/usuar
 
 const SALT_ROUNDS = 12;
 
+const ESPECIALIDADES_SELECT = {
+  especialidades: {
+    select: {
+      esPrincipal: true,
+      especialidad: { select: { id: true, nombre: true } },
+    },
+  },
+};
+
 // GET /api/usuarios — RF-02
 async function listar(req, res, next) {
   try {
@@ -22,6 +31,7 @@ async function listar(req, res, next) {
         activo: true,
         creadoEn: true,
         ultimoAcceso: true,
+        ...ESPECIALIDADES_SELECT,
       },
       orderBy: { nombreCompleto: 'asc' },
     });
@@ -38,7 +48,7 @@ async function crear(req, res, next) {
     if (!parsed.success) {
       return res.status(422).json(errorResponse(parsed.error.issues[0].message, 'VALIDATION_ERROR'));
     }
-    const { password, ...datos } = parsed.data;
+    const { password, especialidadIds = [], ...datos } = parsed.data;
 
     const existe = await prisma.usuario.findUnique({ where: { email: datos.email } });
     if (existe) {
@@ -50,8 +60,23 @@ async function crear(req, res, next) {
 
     const nuevo = await prisma.$transaction(async (tx) => {
       const u = await tx.usuario.create({
-        data: { ...datos, passwordHash, creadoPorId: req.user.id },
-        select: { id: true, nombreCompleto: true, email: true, rol: true, activo: true, creadoEn: true },
+        data: {
+          ...datos,
+          passwordHash,
+          creadoPorId: req.user.id,
+          ...(datos.rol === 'medico' && especialidadIds.length > 0 ? {
+            especialidades: {
+              create: especialidadIds.map((id, idx) => ({
+                especialidadId: id,
+                esPrincipal: idx === 0,
+              })),
+            },
+          } : {}),
+        },
+        select: {
+          id: true, nombreCompleto: true, email: true, rol: true, activo: true, creadoEn: true,
+          ...ESPECIALIDADES_SELECT,
+        },
       });
       await registrarAuditoria(tx, {
         usuarioId: req.user.id,
@@ -84,7 +109,7 @@ async function editar(req, res, next) {
       return res.status(404).json(errorResponse('Usuario no encontrado', 'NOT_FOUND'));
     }
 
-    const { password, ...datos } = parsed.data;
+    const { password, especialidadIds, ...datos } = parsed.data;
     if (password) datos.passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
 
     const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
@@ -95,6 +120,21 @@ async function editar(req, res, next) {
         data: datos,
         select: { id: true, nombreCompleto: true, email: true, rol: true, activo: true },
       });
+
+      // Reemplazar especialidades si se envió el campo (solo para médicos)
+      if (Array.isArray(especialidadIds) && u.rol === 'medico') {
+        await tx.medicoEspecialidad.deleteMany({ where: { medicoId: u.id } });
+        if (especialidadIds.length > 0) {
+          await tx.medicoEspecialidad.createMany({
+            data: especialidadIds.map((id, idx) => ({
+              medicoId: u.id,
+              especialidadId: id,
+              esPrincipal: idx === 0,
+            })),
+          });
+        }
+      }
+
       await registrarAuditoria(tx, {
         usuarioId: req.user.id,
         accion: 'UPDATE',
@@ -105,7 +145,12 @@ async function editar(req, res, next) {
         ip,
         userAgent: req.headers['user-agent'],
       });
-      return u;
+
+      // Retornar con especialidades actualizadas
+      return tx.usuario.findUnique({
+        where: { id: u.id },
+        select: { id: true, nombreCompleto: true, email: true, rol: true, activo: true, ...ESPECIALIDADES_SELECT },
+      });
     });
 
     return res.json(actualizado);
