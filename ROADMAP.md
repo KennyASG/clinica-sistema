@@ -139,10 +139,10 @@
 > Semanas 17-18 | Meta: sistema aprobado por el cliente (UAT).
 
 - [x] **Pruebas de integración end-to-end** — Flujo completo: login → buscar paciente → consulta → cita ✅ 2026-03-28
-- [ ] **UAT con usuario real** — Secretaria opera el sistema 3 días consecutivos
+- [x] **UAT con usuario real** — Secretaria opera el sistema 3 días consecutivos ✅ 2026-03-30
 - [x] **Pruebas de seguridad** — Verificar que cada rol solo accede a lo que le corresponde ✅ 2026-03-28
 - [x] **Prueba de carga** — 20 usuarios concurrentes sin degradación (Artillery) ✅ 2026-03-28
-- [ ] **Corrección de bugs encontrados en UAT**
+- [x] **Corrección de bugs encontrados en UAT** ✅ 2026-03-30
 - [x] **Documentación de usuario final** — Guía rápida por rol (secretaria, enfermera, médico) ✅ 2026-03-28
 - [x] **Setup de monitoreo** — UptimeRobot + alertas DigitalOcean + instrucciones ✅ 2026-03-28
 - [x] **Configuración de backups automáticos** — Cron job diario a las 2am → DO Spaces ✅ 2026-03-28
