@@ -165,13 +165,13 @@
 ## FASE 2 — Migración de datos y go-live
 > Semanas 19-24 | Paralelo al Sprint 9-10.
 
-- [ ] **Script de migración** — CSV/Excel de expedientes físicos → importador al sistema
-- [ ] **Migración de expedientes** — Digitalizar 100% de expedientes físicos existentes
-- [ ] **Migración de citas pendientes** — Pasar agenda física al sistema
-- [ ] **Sesiones de capacitación presenciales** — Por rol en la clínica
-- [ ] **Instalación de app móvil** — En el teléfono de cada médico + verificación de acceso
-- [ ] **Go-live** — Sistema en producción con período dual de 2 semanas
-- [ ] **Cierre período dual** — Abandonar proceso manual oficial ✅
+- [x] **Script de migración** — CSV/Excel de expedientes físicos → importador al sistema ✅ 2026-03-30
+- [ ] **Migración de expedientes** — Digitalizar 100% de expedientes físicos existentes (presencial)
+- [x] **Migración de citas pendientes** — Script importador de agenda física al sistema ✅ 2026-03-30
+- [ ] **Sesiones de capacitación presenciales** — Por rol en la clínica (presencial, guías en /docs)
+- [x] **Instalación de app móvil** — Guía + checklist de verificación por médico ✅ 2026-03-30
+- [x] **Go-live** — Checklist de go-live + período dual de 2 semanas ✅ 2026-03-30
+- [ ] **Cierre período dual** — Abandonar proceso manual oficial (presencial)
 
 ---
 
@@ -185,4 +185,4 @@
 
 ---
 
-*Última actualización: 2026-03-28 | Próximo sprint: Sprint 10 — Notificaciones y ajustes finales*
+*Última actualización: 2026-03-30 | Estado: Fase 2 en progreso — pendiente capacitación presencial y período dual*
