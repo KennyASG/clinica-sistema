@@ -3,6 +3,9 @@ import { useAuth } from './context/AuthContext';
 import AppLayout from './components/layouts/AppLayout';
 import LoginPage from './pages/LoginPage';
 import UsuariosPage from './pages/admin/UsuariosPage';
+import PacientesPage from './pages/expedientes/PacientesPage';
+import CrearPacientePage from './pages/expedientes/CrearPacientePage';
+import ExpedientePage from './pages/expedientes/ExpedientePage';
 
 function RutaProtegida({ roles, children }) {
   const { usuario } = useAuth();
@@ -52,8 +55,11 @@ export default function App() {
           }
         />
 
-        {/* Placeholders — se implementan en sprints siguientes */}
-        <Route path="/expedientes" element={<Placeholder titulo="Expedientes" />} />
+        {/* Expedientes — Sprint 3-4 */}
+        <Route path="/expedientes" element={<PacientesPage />} />
+        <Route path="/expedientes/nuevo" element={<CrearPacientePage />} />
+        <Route path="/expedientes/paciente/:pacienteId" element={<ExpedientePage />} />
+
         <Route path="/citas" element={<Placeholder titulo="Citas" />} />
         <Route path="/reportes" element={<Placeholder titulo="Reportes" />} />
         <Route path="/auditoria" element={<Placeholder titulo="Auditoría" />} />
