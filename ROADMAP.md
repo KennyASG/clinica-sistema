@@ -149,6 +149,19 @@
 
 ---
 
+## SPRINT 11 — Infraestructura containerizada y despliegue
+> Prerequisito para go-live. Arquitectura: frontend estático → DO Spaces CDN | backend → Docker en Droplet.
+
+- [x] **Dockerfile backend** — Imagen Node.js multistage, non-root, con health check ✅ 2026-03-30
+- [x] **docker-compose.yml dev** — Backend + PostgreSQL local, hot-reload con volúmenes ✅ 2026-03-30
+- [x] **docker-compose.prod.yml** — Sin BD (usa host), restart policy, variables por env_file ✅ 2026-03-30
+- [x] **Nginx reverse proxy config** — `/api/*` → container, SPA fallback para frontend ✅ 2026-03-30
+- [x] **Script deploy frontend a DO Spaces** — Build Vite + sync a Spaces con cache headers ✅ 2026-03-30
+- [x] **GitHub Actions CI/CD** — Push a `main` → tests → build imagen → push GHCR → deploy Droplet ✅ 2026-03-30
+- [x] **Variables de entorno de producción** — `.env.production.example` documentado ✅ 2026-03-30
+
+---
+
 ## FASE 2 — Migración de datos y go-live
 > Semanas 19-24 | Paralelo al Sprint 9-10.
 

@@ -1,0 +1,27 @@
+# docker-compose.prod.yml — Entorno de PRODUCCIÓN
+# Uso en el Droplet:
+#   docker compose -f docker-compose.prod.yml up -d --pull always
+#
+# PostgreSQL corre directamente en el host (no en container) para evitar
+# riesgos de pérdida de volúmenes. La BD se referencia via DATABASE_URL.
+
+services:
+
+  api:
+    image: ghcr.io/${GITHUB_REPO}/clinica-api:latest
+    container_name: clinica-api
+    restart: always
+    env_file: /opt/clinica/.env.production
+    ports:
+      - "127.0.0.1:3000:3000"   # Solo accesible desde localhost — Nginx hace el proxy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
