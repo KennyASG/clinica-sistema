@@ -3,9 +3,13 @@ import { useAuth } from './context/AuthContext';
 import AppLayout from './components/layouts/AppLayout';
 import LoginPage from './pages/LoginPage';
 import UsuariosPage from './pages/admin/UsuariosPage';
+import ReportesPage from './pages/admin/ReportesPage';
+import AuditoriaPage from './pages/admin/AuditoriaPage';
 import PacientesPage from './pages/expedientes/PacientesPage';
 import CrearPacientePage from './pages/expedientes/CrearPacientePage';
 import ExpedientePage from './pages/expedientes/ExpedientePage';
+import CitasPage from './pages/citas/CitasPage';
+import NuevaCitaPage from './pages/citas/NuevaCitaPage';
 
 function RutaProtegida({ roles, children }) {
   const { usuario } = useAuth();
@@ -24,9 +28,7 @@ export default function App() {
         element={usuario ? <Navigate to="/" replace /> : <LoginPage />}
       />
 
-      {/* Layout autenticado */}
       <Route element={<AppLayout />}>
-        {/* Redirección raíz según rol */}
         <Route
           path="/"
           element={
@@ -46,37 +48,29 @@ export default function App() {
         />
 
         {/* Admin */}
-        <Route
-          path="/admin/usuarios"
-          element={
-            <RutaProtegida roles={['administrador']}>
-              <UsuariosPage />
-            </RutaProtegida>
-          }
-        />
+        <Route path="/admin/usuarios" element={
+          <RutaProtegida roles={['administrador']}><UsuariosPage /></RutaProtegida>
+        } />
 
-        {/* Expedientes — Sprint 3-4 */}
+        {/* Reportes y auditoría */}
+        <Route path="/reportes" element={
+          <RutaProtegida roles={['administrador', 'medico']}><ReportesPage /></RutaProtegida>
+        } />
+        <Route path="/auditoria" element={
+          <RutaProtegida roles={['administrador']}><AuditoriaPage /></RutaProtegida>
+        } />
+
+        {/* Expedientes */}
         <Route path="/expedientes" element={<PacientesPage />} />
         <Route path="/expedientes/nuevo" element={<CrearPacientePage />} />
         <Route path="/expedientes/paciente/:pacienteId" element={<ExpedientePage />} />
 
-        <Route path="/citas" element={<Placeholder titulo="Citas" />} />
-        <Route path="/reportes" element={<Placeholder titulo="Reportes" />} />
-        <Route path="/auditoria" element={<Placeholder titulo="Auditoría" />} />
+        {/* Citas */}
+        <Route path="/citas" element={<CitasPage />} />
+        <Route path="/citas/nueva" element={<NuevaCitaPage />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
-  );
-}
-
-function Placeholder({ titulo }) {
-  return (
-    <div className="flex items-center justify-center h-64">
-      <div className="text-center">
-        <h2 className="text-lg font-semibold text-gray-600">{titulo}</h2>
-        <p className="text-sm text-gray-400 mt-1">Módulo disponible en próximo sprint</p>
-      </div>
-    </div>
   );
 }

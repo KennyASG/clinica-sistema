@@ -1,11 +1,15 @@
+import { AlertTriangle } from 'lucide-react';
+
 export default function AlergiasBanner({ alergias }) {
   if (!alergias) return null;
   return (
-    <div className="bg-red-600 text-white rounded-lg px-5 py-4 mb-6 flex gap-3 items-start shadow-md">
-      <span className="text-2xl mt-0.5">⚠️</span>
+    <div className="flex items-start gap-3 bg-red-50 border border-red-200 rounded-xl px-4 py-3.5">
+      <div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+        <AlertTriangle className="w-4 h-4 text-red-600" />
+      </div>
       <div>
-        <p className="font-bold text-lg leading-tight">ALERTA DE ALERGIAS</p>
-        <p className="text-red-100 mt-1 text-sm whitespace-pre-line">{alergias}</p>
+        <p className="text-sm font-semibold text-red-700">Alerta de alergias</p>
+        <p className="text-sm text-red-600 mt-0.5 whitespace-pre-line">{alergias}</p>
       </div>
     </div>
   );

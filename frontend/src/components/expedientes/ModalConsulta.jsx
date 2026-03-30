@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { X, Link2 } from 'lucide-react';
 import api from '../../services/api';
+import CIE10Input from './CIE10Input';
 
 const FORM_INICIAL = {
   motivoConsulta: '', diagnosticoCie10: '', diagnosticoDescripcion: '',
@@ -8,7 +10,10 @@ const FORM_INICIAL = {
   proximaCitaDias: '', esEmergencia: false,
 };
 
-export default function ModalConsulta({ expedienteId, onCerrar }) {
+const labelCls = 'block text-xs font-medium text-slate-500 mb-1.5';
+const inputCls = 'w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent';
+
+export default function ModalConsulta({ expedienteId, citaId, onCerrar }) {
   const qc = useQueryClient();
   const [form, setForm] = useState(FORM_INICIAL);
   const [apiError, setApiError] = useState('');
@@ -32,6 +37,7 @@ export default function ModalConsulta({ expedienteId, onCerrar }) {
     setApiError('');
     const payload = {
       expedienteId,
+      ...(citaId && { citaId }),
       motivoConsulta: form.motivoConsulta,
       esEmergencia: form.esEmergencia,
       ...(form.diagnosticoCie10 && { diagnosticoCie10: form.diagnosticoCie10 }),
@@ -45,72 +51,123 @@ export default function ModalConsulta({ expedienteId, onCerrar }) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-800">Nueva nota de consulta</h2>
-          <button onClick={onCerrar} className="text-gray-400 hover:text-gray-600 text-xl leading-none">×</button>
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] flex flex-col">
+
+        {/* Header fijo */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 flex-shrink-0">
+          <div>
+            <h2 className="text-base font-semibold text-slate-900">Nueva nota de consulta</h2>
+            {citaId && (
+              <p className="flex items-center gap-1 text-xs text-indigo-600 mt-0.5">
+                <Link2 className="w-3 h-3" />
+                Vinculada a cita programada
+              </p>
+            )}
+          </div>
+          <button
+            onClick={onCerrar}
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
+        {/* Cuerpo scrollable */}
+        <form onSubmit={handleSubmit} className="overflow-y-auto px-6 py-5 space-y-4 flex-1">
+
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Motivo de consulta *</label>
-            <textarea name="motivoConsulta" value={form.motivoConsulta} onChange={handleChange} required rows={2}
-              className="w-full border border-gray-300 rounded px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            <label className={labelCls}>Motivo de consulta *</label>
+            <textarea
+              name="motivoConsulta"
+              value={form.motivoConsulta}
+              onChange={handleChange}
+              required
+              rows={2}
+              className={`${inputCls} resize-none`}
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Código CIE-10</label>
-              <input type="text" name="diagnosticoCie10" value={form.diagnosticoCie10} onChange={handleChange}
-                placeholder="Ej: J06.9" maxLength={10}
-                className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              <label className={labelCls}>Código CIE-10</label>
+              <CIE10Input
+                value={form.diagnosticoCie10}
+                onChange={(v) => setForm(f => ({ ...f, diagnosticoCie10: v }))}
+              />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Días para próxima cita</label>
-              <input type="number" name="proximaCitaDias" value={form.proximaCitaDias} onChange={handleChange}
-                min={1} placeholder="Ej: 30"
-                className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              <label className={labelCls}>Días para próxima cita</label>
+              <input
+                type="number"
+                name="proximaCitaDias"
+                value={form.proximaCitaDias}
+                onChange={handleChange}
+                min={1}
+                placeholder="Ej: 30"
+                className={inputCls}
+              />
             </div>
           </div>
 
-          <Textarea label="Diagnóstico" name="diagnosticoDescripcion" value={form.diagnosticoDescripcion} onChange={handleChange} />
-          <Textarea label="Tratamiento" name="tratamiento" value={form.tratamiento} onChange={handleChange} />
-          <Textarea label="Medicamentos recetados" name="medicamentosRecetados" value={form.medicamentosRecetados} onChange={handleChange} />
-          <Textarea label="Indicaciones generales" name="indicacionesGenerales" value={form.indicacionesGenerales} onChange={handleChange} />
+          <FieldTextarea label="Diagnóstico" name="diagnosticoDescripcion" value={form.diagnosticoDescripcion} onChange={handleChange} />
+          <FieldTextarea label="Tratamiento" name="tratamiento" value={form.tratamiento} onChange={handleChange} />
+          <FieldTextarea label="Medicamentos recetados" name="medicamentosRecetados" value={form.medicamentosRecetados} onChange={handleChange} />
+          <FieldTextarea label="Indicaciones generales" name="indicacionesGenerales" value={form.indicacionesGenerales} onChange={handleChange} />
 
-          <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
-            <input type="checkbox" name="esEmergencia" checked={form.esEmergencia} onChange={handleChange}
-              className="rounded border-gray-300" />
+          <label className="flex items-center gap-2.5 text-sm text-slate-600 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              name="esEmergencia"
+              checked={form.esEmergencia}
+              onChange={handleChange}
+              className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+            />
             Consulta de emergencia (fuera de cita programada)
           </label>
 
           {apiError && (
-            <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded px-3 py-2">{apiError}</p>
+            <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2.5">
+              {apiError}
+            </p>
           )}
-
-          <div className="flex justify-end gap-2 pt-2">
-            <button type="button" onClick={onCerrar}
-              className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded">
-              Cancelar
-            </button>
-            <button type="submit" disabled={mutCrear.isPending}
-              className="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded font-medium">
-              {mutCrear.isPending ? 'Guardando...' : 'Guardar consulta'}
-            </button>
-          </div>
         </form>
+
+        {/* Footer fijo */}
+        <div className="flex justify-end gap-2 px-6 py-4 border-t border-slate-100 flex-shrink-0">
+          <button
+            type="button"
+            onClick={onCerrar}
+            className="px-4 py-2 text-sm text-slate-500 hover:bg-slate-100 rounded-lg transition-colors"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            form="consulta-form"
+            onClick={handleSubmit}
+            disabled={mutCrear.isPending}
+            className="px-4 py-2 text-sm bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-lg font-medium transition-colors"
+          >
+            {mutCrear.isPending ? 'Guardando...' : 'Guardar consulta'}
+          </button>
+        </div>
       </div>
     </div>
   );
 }
 
-function Textarea({ label, name, value, onChange }) {
+function FieldTextarea({ label, name, value, onChange }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
-      <textarea name={name} value={value} onChange={onChange} rows={2}
-        className="w-full border border-gray-300 rounded px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500" />
+      <label className="block text-xs font-medium text-slate-500 mb-1.5">{label}</label>
+      <textarea
+        name={name}
+        value={value}
+        onChange={onChange}
+        rows={2}
+        className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+      />
     </div>
   );
 }

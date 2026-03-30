@@ -1,0 +1,4 @@
+nombre_completo,dpi,fecha_nacimiento,sexo,telefono,telefono_emergencia,contacto_emergencia,direccion,correo,tipo_sangre,alergias,enfermedades_cronicas,medicamentos_permanentes,antecedentes_familiares,antecedentes_quirurgicos,seguro_medico,numero_poliza,observaciones
+María García López,2847362910456,1985-04-12,femenino,50123456,50987654,Juan García (esposo),Zona 10 Guatemala Ciudad,maria.garcia@email.com,O+,Penicilina,Hipertensión arterial,Losartán 50mg diario,Padre diabético,,Seguros G&T,POL-2024-001,
+Carlos Rodríguez Méndez,1234567890123,1972-08-25,masculino,55441122,,,Zona 3 Guatemala Ciudad,,,A+,,Diabetes tipo 2,Metformina 850mg,Madre hipertensa,Apendicectomía 2010,IGSS,IGS-001234,Control diabético cada 3 meses
+Ana López de Pérez,9876543210987,1990-11-30,femenino,45678901,45000011,Roberto Pérez (esposo),Mixco Guatemala,ana.lopez@email.com,B-,Sulfas - Ibuprofeno,,,,,,,
