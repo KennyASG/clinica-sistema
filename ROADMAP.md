@@ -25,23 +25,23 @@
 > Semanas 3-6 | Meta: cualquier rol puede autenticarse y el admin puede configurar la clínica.
 
 ### Backend
-- [ ] **RF-01** — `POST /api/auth/login` — Login con email + password, retorna JWT
-- [ ] **RF-04** — Middleware de expiración de sesión (30 min inactividad en web)
-- [ ] **RF-05** — Registro automático en tabla `auditoria` en cada login/logout
-- [ ] **RF-06** — JWT con `exp: never` para app móvil (sesión persistente)
-- [ ] **RF-02/03** — CRUD de usuarios (solo admin): `GET/POST/PATCH /api/usuarios`
-- [ ] **Middleware `authMiddleware`** — Verifica JWT en cada request protegido
-- [ ] **Middleware `requireRole`** — Valida que el rol del token tenga permiso al endpoint
+- [x] **RF-01** — `POST /api/auth/login` — Login con email + password, retorna JWT ✅ 2026-03-27
+- [x] **RF-04** — Middleware de expiración de sesión (30 min inactividad en web) ✅ 2026-03-27
+- [x] **RF-05** — Registro automático en tabla `auditoria` en cada login/logout ✅ 2026-03-27
+- [x] **RF-06** — JWT con `exp: never` para app móvil (sesión persistente) ✅ 2026-03-27
+- [x] **RF-02/03** — CRUD de usuarios (solo admin): `GET/POST/PATCH /api/usuarios` ✅ 2026-03-27
+- [x] **Middleware `authMiddleware`** — Verifica JWT en cada request protegido ✅ 2026-03-27
+- [x] **Middleware `requireRole`** — Valida que el rol del token tenga permiso al endpoint ✅ 2026-03-27
 
 ### Frontend web
-- [ ] **Pantalla Login** — Formulario email/password, manejo de error, redirección por rol
-- [ ] **Layout base con sidebar** — Navegación diferente por rol (secretaria vs médico vs admin)
-- [ ] **Pantalla gestión de usuarios (admin)** — Tabla de usuarios, crear/editar/desactivar
+- [x] **Pantalla Login** — Formulario email/password, manejo de error, redirección por rol ✅ 2026-03-27
+- [x] **Layout base con sidebar** — Navegación diferente por rol (secretaria vs médico vs admin) ✅ 2026-03-27
+- [x] **Pantalla gestión de usuarios (admin)** — Tabla de usuarios, crear/editar/desactivar ✅ 2026-03-27
 
 ### Pruebas Sprint 1-2
-- [ ] Prueba: login con credenciales inválidas retorna 401
-- [ ] Prueba: usuario con rol `secretaria` no puede acceder a `POST /api/consultas` (403)
-- [ ] Prueba: token expirado retorna 401 con mensaje claro
+- [x] Prueba: login con credenciales inválidas retorna 401 ✅ 2026-03-27
+- [x] Prueba: usuario con rol `secretaria` no puede acceder a `POST /api/consultas` (403) ✅ 2026-03-27
+- [x] Prueba: token expirado retorna 401 con mensaje claro ✅ 2026-03-27
 
 ---
 
