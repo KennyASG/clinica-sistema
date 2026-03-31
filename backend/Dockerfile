@@ -1,16 +1,16 @@
 # ─── Stage 1: dependencias ────────────────────────────────────────────────────
-FROM node:22-alpine AS deps
+FROM node:22-slim AS deps
 WORKDIR /app
 
 COPY package*.json ./
 RUN npm ci --only=production && npm cache clean --force
 
 # ─── Stage 2: imagen final ────────────────────────────────────────────────────
-FROM node:22-alpine AS runner
+FROM node:22-slim AS runner
 WORKDIR /app
 
 # Seguridad: usuario no-root
-RUN addgroup -S clinica && adduser -S clinica -G clinica
+RUN groupadd -r clinica && useradd -r -g clinica clinica
 
 # Copiar dependencias del stage anterior
 COPY --from=deps /app/node_modules ./node_modules
