@@ -17,6 +17,9 @@ app.get('/health', (_req, res) => {
   res.json({ ok: true, version: '1.0.0' });
 });
 
+// RF-26 — Bloquea escritura desde app móvil
+app.use(require('./middlewares/readOnlyMobile'));
+
 // Rutas API
 app.use('/api', require('./routes/index'));
 
@@ -35,9 +38,13 @@ app.use((err, _req, res, _next) => {
   });
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Servidor corriendo en puerto ${PORT}`);
-});
+// Solo arranca el servidor si este archivo es el punto de entrada directo.
+// Cuando jest/supertest importa app.js, no levanta el puerto.
+if (require.main === module) {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
+    console.log(`Servidor corriendo en puerto ${PORT}`);
+  });
+}
 
 module.exports = app;

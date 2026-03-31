@@ -1,0 +1,19 @@
+{
+  "expo": {
+    "name": "Clínica Médica",
+    "slug": "clinica-medica",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "gt.clinica.medica"
+    },
+    "android": {
+      "package": "gt.clinica.medica"
+    },
+    "extra": {
+      "apiUrl": "http://172.20.10.2:3000"
+    }
+  }
+}

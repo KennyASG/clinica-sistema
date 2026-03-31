@@ -1,0 +1,4 @@
+dpi_paciente,email_medico,fecha,hora_inicio,hora_fin,tipo_consulta,notas_secretaria
+2847362910456,dr.garcia@clinica.gt,2026-04-07,08:00,08:30,Consulta general,Paciente solicita chequeo anual
+1234567890123,dr.garcia@clinica.gt,2026-04-07,08:30,09:00,Control de crónicos,Control de diabetes - traer resultados de laboratorio
+9876543210987,dra.lopez@clinica.gt,2026-04-08,10:00,10:30,Consulta general,Primera vez en la clínica

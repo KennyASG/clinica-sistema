@@ -1,0 +1,35 @@
+# ─── Stage 1: dependencias ────────────────────────────────────────────────────
+FROM node:20-alpine AS deps
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm ci --only=production && npm cache clean --force
+
+# ─── Stage 2: imagen final ────────────────────────────────────────────────────
+FROM node:20-alpine AS runner
+WORKDIR /app
+
+# Seguridad: usuario no-root
+RUN addgroup -S clinica && adduser -S clinica -G clinica
+
+# Copiar dependencias del stage anterior
+COPY --from=deps /app/node_modules ./node_modules
+
+# Copiar el código fuente y el schema de Prisma
+COPY src ./src
+COPY prisma ./prisma
+COPY package.json ./
+
+# Generar Prisma Client dentro de la imagen
+RUN npx prisma generate
+
+# El proceso corre como usuario sin privilegios
+USER clinica
+
+EXPOSE 3000
+
+# Health check: el endpoint /health debe responder 200
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+  CMD wget -qO- http://localhost:3000/health || exit 1
+
+CMD ["node", "src/server.js"]

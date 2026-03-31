@@ -54,7 +54,7 @@ clinica-sistema/
 - **RN-01:** No pueden existir dos citas activas para el mismo médico en el mismo horario.
 - **RN-02:** Solo el médico tratante puede escribir o editar diagnóstico/tratamiento.
 - **RN-03:** Los expedientes NUNCA se eliminan físicamente — solo `activo = false`.
-- **RN-04:** La app móvil es SOLO LECTURA — nunca permite escribir ni editar.
+- **RN-04:** La app móvil es principalmente de consulta. La única escritura permitida desde móvil es el registro de signos vitales (`POST /api/signos-vitales`), para que enfermeras y médicos puedan tomarlos en cabecera sin necesidad de una computadora. Cualquier otra escritura sigue bloqueada.
 - **RN-05:** Al cancelar una cita, el motivo de cancelación es obligatorio.
 - **RN-06:** Toda modificación genera un registro en la tabla `auditoria` con usuario, fecha y IP.
 
