@@ -105,61 +105,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           
 
-  # ── Job 3: Deploy frontend a DO Spaces ───────────────────────────────────────
-  deploy-frontend:
-    name: Deploy Frontend → DO Spaces
-    needs: test
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-          cache: npm
-          cache-dependency-path: frontend/package-lock.json
-
-      - name: Instalar dependencias frontend
-        working-directory: frontend
-        run: npm ci
-
-      - name: Build Vite
-        working-directory: frontend
-        env:
-          VITE_API_URL: ${{ secrets.VITE_API_URL }}
-        run: npm run build
-
-      - name: Instalar s3cmd
-        run: pip install s3cmd
-
-      - name: Sync assets (cache largo)
-        run: |
-          s3cmd sync \
-            --access_key="${{ secrets.DO_SPACES_KEY }}" \
-            --secret_key="${{ secrets.DO_SPACES_SECRET }}" \
-            --host="${{ secrets.DO_SPACES_REGION }}.digitaloceanspaces.com" \
-            --host-bucket="%(bucket)s.${{ secrets.DO_SPACES_REGION }}.digitaloceanspaces.com" \
-            --acl-public \
-            --add-header="Cache-Control:public, max-age=31536000, immutable" \
-            --exclude="index.html" --exclude="*.json" \
-            frontend/dist/ \
-            "s3://${{ secrets.DO_SPACES_BUCKET }}/"
-
-      - name: Sync index.html (sin cache)
-        run: |
-          s3cmd sync \
-            --access_key="${{ secrets.DO_SPACES_KEY }}" \
-            --secret_key="${{ secrets.DO_SPACES_SECRET }}" \
-            --host="${{ secrets.DO_SPACES_REGION }}.digitaloceanspaces.com" \
-            --host-bucket="%(bucket)s.${{ secrets.DO_SPACES_REGION }}.digitaloceanspaces.com" \
-            --acl-public \
-            --add-header="Cache-Control:no-cache, no-store, must-revalidate" \
-            --include="index.html" --include="*.json" \
-            frontend/dist/ \
-            "s3://${{ secrets.DO_SPACES_BUCKET }}/"
-
-  # ── Job 4: Deploy API al Droplet ─────────────────────────────────────────────
+  # ── Job 3: Deploy API al Droplet ─────────────────────────────────────────────
   deploy-api:
     name: Deploy API → Droplet
     needs: build-image
