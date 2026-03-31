@@ -28,13 +28,18 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: npm
           cache-dependency-path: backend/package-lock.json
 
       - name: Instalar dependencias backend
         working-directory: backend
         run: npm ci
+
+      - name: Habilitar extensión UUID
+        run: psql -h localhost -U postgres -d clinica_test -c 'CREATE EXTENSION IF NOT EXISTS "uuid-ossp";'
+        env:
+          PGPASSWORD: postgres
 
       - name: Generar Prisma Client
         working-directory: backend
