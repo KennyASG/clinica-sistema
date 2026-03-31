@@ -182,9 +182,6 @@ jobs:
             echo "▶ Reiniciando container..."
             docker compose -f docker-compose.prod.yml up -d --remove-orphans
 
-            echo "▶ Ejecutando migraciones pendientes..."
-            docker exec clinica-api npx prisma migrate deploy
-
             echo "▶ Limpiando imágenes antiguas..."
             docker image prune -f
 
