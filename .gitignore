@@ -30,3 +30,5 @@ backend/prisma/migrations/
 mobile/.expo/
 mobile/android/
 mobile/ios/
+
+*.md
