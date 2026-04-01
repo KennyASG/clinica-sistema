@@ -4,6 +4,9 @@ on:
   push:
     branches: [main]
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   # ── Job 1: Tests backend ─────────────────────────────────────────────────────
   test:
@@ -97,7 +100,7 @@ jobs:
             type=raw,value=latest
 
       - name: Build y push
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: ./backend
           push: true
