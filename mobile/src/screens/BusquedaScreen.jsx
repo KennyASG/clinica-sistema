@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import {
-  View, Text, TextInput, TouchableOpacity,
-  FlatList, StyleSheet, ActivityIndicator, StatusBar,
+  View, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback,
+  FlatList, StyleSheet, ActivityIndicator, StatusBar, Keyboard,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -34,10 +34,11 @@ export default function BusquedaScreen({ navigation }) {
   useEffect(() => {
     obtenerRecientes().then(setRecientes);
     getUsuario().then(setUsuario);
-    const unsubscribe = navigation.addListener('focus', () => {
+    const unsubFocus = navigation.addListener('focus', () => {
       obtenerRecientes().then(setRecientes);
     });
-    return unsubscribe;
+    const unsubBlur = navigation.addListener('blur', () => Keyboard.dismiss());
+    return () => { unsubFocus(); unsubBlur(); };
   }, [navigation]);
 
   const buscar = useCallback(async (texto) => {
@@ -74,6 +75,7 @@ export default function BusquedaScreen({ navigation }) {
   const primerNombre = usuario?.nombre?.trim().split(' ')[0];
 
   return (
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
     <View style={styles.container}>
 
       <StatusBar barStyle="light-content" />
@@ -179,6 +181,7 @@ export default function BusquedaScreen({ navigation }) {
         </View>
       )}
     </View>
+    </TouchableWithoutFeedback>
   );
 }
 
