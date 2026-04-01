@@ -56,4 +56,37 @@ async function enviarConfirmacionCita({ correo, nombrePaciente, medico, fecha, t
   }
 }
 
-module.exports = { enviarConfirmacionCita };
+/**
+ * Envía email de restablecimiento de contraseña.
+ * Si SMTP no está configurado, omite silenciosamente.
+ */
+async function enviarResetPassword({ correo, nombreUsuario, linkReset }) {
+  const transporter = crearTransporter();
+  if (!transporter || !correo) return;
+
+  try {
+    await transporter.sendMail({
+      from: process.env.SMTP_FROM || `"Clínica" <${process.env.SMTP_USER}>`,
+      to: correo,
+      subject: 'Restablecimiento de contraseña',
+      text: [
+        `Estimado/a ${nombreUsuario},`,
+        '',
+        'Recibimos una solicitud para restablecer la contraseña de su cuenta.',
+        '',
+        'Acceda al siguiente enlace para crear una nueva contraseña:',
+        '',
+        linkReset,
+        '',
+        'Este enlace es válido por 15 minutos. Si no solicitó este cambio, ignore este correo.',
+        '',
+        'Atentamente,',
+        'Clínica Médica',
+      ].join('\n'),
+    });
+  } catch (err) {
+    console.error('[email] Error al enviar reset de contraseña:', err.message);
+  }
+}
+
+module.exports = { enviarConfirmacionCita, enviarResetPassword };

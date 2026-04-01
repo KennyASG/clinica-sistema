@@ -5,7 +5,8 @@ const jwt = require('jsonwebtoken');
 const prisma = require('../utils/prismaClient');
 const errorResponse = require('../utils/errorResponse');
 const registrarAuditoria = require('../utils/auditoria');
-const { loginSchema } = require('../validators/auth');
+const { loginSchema, forgotPasswordSchema, resetPasswordSchema } = require('../validators/auth');
+const { enviarResetPassword } = require('../utils/email');
 
 const INTENTOS_MAX = 5;
 const BLOQUEO_MS = 15 * 60 * 1000; // 15 minutos
@@ -116,4 +117,72 @@ async function refresh(req, res, next) {
   }
 }
 
-module.exports = { login, logout, refresh };
+// POST /api/auth/forgot-password
+// Genera token JWT de 15 min y envía link al correo del usuario
+async function forgotPassword(req, res, next) {
+  try {
+    const parsed = forgotPasswordSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(422).json(errorResponse(parsed.error.issues[0].message, 'VALIDATION_ERROR'));
+    }
+
+    // Respuesta siempre exitosa — no revelar si el email existe
+    const usuario = await prisma.usuario.findUnique({ where: { email: parsed.data.email } });
+    if (!usuario || !usuario.activo) {
+      return res.json({ ok: true });
+    }
+
+    const token = jwt.sign(
+      { id: usuario.id, email: usuario.email, proposito: 'reset_password' },
+      process.env.JWT_SECRET,
+      { expiresIn: '15m' }
+    );
+
+    const frontendUrl = process.env.FRONTEND_URL || 'https://clinica.kdevsa.online';
+    const linkReset = `${frontendUrl}/reset-password?token=${token}`;
+
+    await enviarResetPassword({
+      correo: usuario.email,
+      nombreUsuario: usuario.nombreCompleto,
+      linkReset,
+    });
+
+    return res.json({ ok: true });
+  } catch (err) {
+    next(err);
+  }
+}
+
+// POST /api/auth/reset-password
+// Valida el token JWT y actualiza la contraseña
+async function resetPassword(req, res, next) {
+  try {
+    const parsed = resetPasswordSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(422).json(errorResponse(parsed.error.issues[0].message, 'VALIDATION_ERROR'));
+    }
+
+    let payload;
+    try {
+      payload = jwt.verify(parsed.data.token, process.env.JWT_SECRET);
+    } catch {
+      return res.status(400).json(errorResponse('El enlace ha expirado o no es válido. Solicita uno nuevo.', 'TOKEN_INVALIDO'));
+    }
+
+    if (payload.proposito !== 'reset_password') {
+      return res.status(400).json(errorResponse('Token no válido para esta operación', 'TOKEN_INVALIDO'));
+    }
+
+    const hash = await bcrypt.hash(parsed.data.password, 12);
+    await prisma.usuario.update({
+      where: { id: payload.id },
+      data: { passwordHash: hash, intentosFallidos: 0, bloqueadoHasta: null },
+    });
+
+    return res.json({ ok: true });
+  } catch (err) {
+    next(err);
+  }
+}
+
+module.exports = { login, logout, refresh, forgotPassword, resetPassword };

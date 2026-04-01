@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Mail, Lock, Eye, EyeOff, Activity, Stethoscope } from 'lucide-react';
 
@@ -106,6 +106,15 @@ export default function LoginPage() {
             >
               {cargando ? 'Ingresando...' : 'Ingresar'}
             </button>
+
+            <div className="text-center">
+              <Link
+                to="/olvide-password"
+                className="text-xs text-slate-400 hover:text-indigo-600 transition-colors"
+              >
+                Olvidé mi contraseña
+              </Link>
+            </div>
           </form>
         </div>
 

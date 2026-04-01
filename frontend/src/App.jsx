@@ -2,6 +2,8 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import AppLayout from './components/layouts/AppLayout';
 import LoginPage from './pages/LoginPage';
+import OlvidePasswordPage from './pages/OlvidePasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 import UsuariosPage from './pages/admin/UsuariosPage';
 import ReportesPage from './pages/admin/ReportesPage';
 import AuditoriaPage from './pages/admin/AuditoriaPage';
@@ -23,10 +25,9 @@ export default function App() {
 
   return (
     <Routes>
-      <Route
-        path="/login"
-        element={usuario ? <Navigate to="/" replace /> : <LoginPage />}
-      />
+      <Route path="/login" element={usuario ? <Navigate to="/" replace /> : <LoginPage />} />
+      <Route path="/olvide-password" element={usuario ? <Navigate to="/" replace /> : <OlvidePasswordPage />} />
+      <Route path="/reset-password" element={usuario ? <Navigate to="/" replace /> : <ResetPasswordPage />} />
 
       <Route element={<AppLayout />}>
         <Route
