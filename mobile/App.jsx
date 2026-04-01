@@ -40,6 +40,7 @@ function BusquedaStack() {
         component={ExpedienteScreen}
         options={({ route }) => ({
           title: route.params?.paciente?.nombreCompleto?.split(' ')[0] || 'Expediente',
+          headerBackTitle: 'Regresar',
         })}
       />
     </Stack.Navigator>
@@ -59,6 +60,7 @@ function AgendaStack() {
         component={ExpedienteScreen}
         options={({ route }) => ({
           title: route.params?.paciente?.nombreCompleto?.split(' ')[0] || 'Expediente',
+          headerBackTitle: 'Regresar',
         })}
       />
     </Stack.Navigator>
@@ -78,6 +80,7 @@ function SignosStack() {
         component={RegistrarSignosScreen}
         options={({ route }) => ({
           title: route.params?.cita?.paciente?.nombreCompleto?.split(' ')[0] || 'Signos vitales',
+          headerBackTitle: 'Regresar',
         })}
       />
     </Stack.Navigator>

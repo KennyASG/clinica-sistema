@@ -7,7 +7,7 @@ const registrarAuditoria = require('../utils/auditoria');
 const { crearPacienteSchema, editarPacienteSchema } = require('../validators/pacientes');
 
 // GET /api/pacientes?q= — RF-09
-// Búsqueda difusa por nombre (pg_trgm) o exacta por DPI
+// Búsqueda por nombre (palabra a palabra, insensible a mayúsculas) o parcial por DPI
 async function buscar(req, res, next) {
   try {
     const q = (req.query.q || '').trim();
@@ -15,7 +15,8 @@ async function buscar(req, res, next) {
       return res.json([]);
     }
 
-    const esDPI = /^\d{6,15}$/.test(q);
+    // Cualquier secuencia solo de dígitos activa búsqueda por DPI parcial
+    const esDPI = /^\d+$/.test(q);
 
     let pacientes;
     if (esDPI) {
@@ -23,20 +24,20 @@ async function buscar(req, res, next) {
         where: { dpi: { contains: q }, activo: true },
         select: { id: true, nombreCompleto: true, dpi: true, telefono: true, fechaNacimiento: true, sexo: true },
         take: 20,
+        orderBy: { nombreCompleto: 'asc' },
       });
     } else {
-      // Búsqueda difusa con pg_trgm — safe usando tagged template literal de Prisma
-      // unaccent normaliza tildes para que 'garcia' encuentre 'García'
+      // Divide la búsqueda en palabras: todas deben aparecer en el nombre
+      // unaccent normaliza tildes: "garcia" encuentra "García", "lopez" encuentra "López"
+      const palabras = q.split(/\s+/).filter(w => w.length > 0);
+      const condiciones = palabras.map(w => Prisma.sql`unaccent(lower(nombre_completo)) LIKE unaccent(lower(${`%${w}%`}))`);
       pacientes = await prisma.$queryRaw`
         SELECT id, nombre_completo AS "nombreCompleto", dpi, telefono,
                fecha_nacimiento AS "fechaNacimiento", sexo
         FROM paciente
         WHERE activo = true
-          AND (
-            similarity(unaccent(lower(nombre_completo)), unaccent(lower(${q}))) > 0.15
-            OR unaccent(lower(nombre_completo)) LIKE unaccent(lower(${'%' + q + '%'}))
-          )
-        ORDER BY similarity(unaccent(lower(nombre_completo)), unaccent(lower(${q}))) DESC
+          AND ${Prisma.join(condiciones, ' AND ')}
+        ORDER BY nombre_completo
         LIMIT 20
       `;
     }
