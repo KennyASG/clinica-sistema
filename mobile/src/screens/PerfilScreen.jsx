@@ -67,6 +67,11 @@ export default function PerfilScreen({ onLogout }) {
           <Feather name="log-out" size={16} color="#ef4444" style={{ marginRight: 10 }} />
           <Text style={styles.btnCerrarTexto}>Cerrar sesión</Text>
         </TouchableOpacity>
+
+        <Text style={styles.copyright}>
+          Sistema de Gestion Clinica Medica{'\n'}
+          &copy; {new Date().getFullYear()} Kenny Saenz. Todos los derechos reservados.
+        </Text>
       </View>
     </View>
   );
@@ -154,4 +159,12 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
   },
   btnCerrarTexto: { fontSize: 15, fontWeight: '600', color: '#ef4444' },
+
+  copyright: {
+    fontSize: 11,
+    color: '#cbd5e1',
+    textAlign: 'center',
+    marginTop: 28,
+    lineHeight: 17,
+  },
 });

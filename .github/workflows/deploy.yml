@@ -106,6 +106,7 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          provenance: false
           
 
   # ── Job 3: Deploy API al Droplet ─────────────────────────────────────────────
