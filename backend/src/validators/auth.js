@@ -7,4 +7,13 @@ const loginSchema = z.object({
   password: z.string().min(1, 'Contraseña requerida'),
 });
 
-module.exports = { loginSchema };
+const forgotPasswordSchema = z.object({
+  email: z.email('Email inválido'),
+});
+
+const resetPasswordSchema = z.object({
+  token: z.string().min(1, 'Token requerido'),
+  password: z.string().min(8, 'La contraseña debe tener al menos 8 caracteres'),
+});
+
+module.exports = { loginSchema, forgotPasswordSchema, resetPasswordSchema };
