@@ -55,7 +55,8 @@ export default function ReportesPage() {
     const endpoint = tab === 'citas' ? '/reportes/citas/pdf' : '/reportes/pacientes/pdf';
     const token = localStorage.getItem('token');
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL || '/api'}${endpoint}?${params}`, {
+      const baseUrl = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
+      const res = await fetch(`${baseUrl}/api${endpoint}?${params}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) {
