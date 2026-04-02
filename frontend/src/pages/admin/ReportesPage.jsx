@@ -54,16 +54,25 @@ export default function ReportesPage() {
   async function descargarPDF() {
     const endpoint = tab === 'citas' ? '/reportes/citas/pdf' : '/reportes/pacientes/pdf';
     const token = localStorage.getItem('token');
-    const res = await fetch(`${import.meta.env.VITE_API_URL || '/api'}${endpoint}?${params}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const blob = await res.blob();
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement('a');
-    a.href     = url;
-    a.download = `reporte-${tab}-${desde}.pdf`;
-    a.click();
-    URL.revokeObjectURL(url);
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || '/api'}${endpoint}?${params}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        alert(err.message || `Error al generar el PDF (${res.status})`);
+        return;
+      }
+      const blob = await res.blob();
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href     = url;
+      a.download = `reporte-${tab}-${desde}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      alert('No se pudo conectar con el servidor. Intenta de nuevo.');
+    }
   }
 
   const isLoading = tab === 'citas' ? loadCitas : loadPac;
