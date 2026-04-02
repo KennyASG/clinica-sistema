@@ -14,6 +14,9 @@ function crearTransporter() {
     port,
     secure,
     auth: { user: SMTP_USER, pass: SMTP_PASS },
+    connectionTimeout: 5000,   
+    greetingTimeout:  5000,    
+    socketTimeout:    10000,   
   });
 }
 

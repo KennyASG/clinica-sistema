@@ -15,5 +15,6 @@ router.use('/especialidades', require('./especialidades'));
 router.use('/horarios',       require('./horarios'));
 router.use('/reportes',       require('./reportes'));
 router.use('/auditoria',      require('./auditoria'));
+router.use('/documentos',     require('./documentos'));
 
 module.exports = router;
