@@ -5,7 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import {
   ChevronLeft, Phone, Mail, MapPin, Shield, AlertTriangle,
   Pencil, Plus, X, Check, ChevronRight, Activity,
-  Stethoscope, Pill, FileText, Calendar,
+  Stethoscope, Pill, FileText, Calendar, Paperclip, Trash2, Upload,
 } from 'lucide-react';
 import AlergiasBanner from '../../components/expedientes/AlergiasBanner';
 import ModalConsulta from '../../components/expedientes/ModalConsulta';
@@ -59,6 +59,34 @@ export default function ExpedientePage() {
     queryFn: () => api.get(`/expedientes/${paciente.expediente.id}/historial`).then(r => r.data),
     enabled: !!paciente?.expediente?.id,
   });
+
+  const { data: documentos = [] } = useQuery({
+    queryKey: ['documentos', paciente?.expediente?.id],
+    queryFn: () => api.get(`/documentos/${paciente.expediente.id}`).then(r => r.data),
+    enabled: !!paciente?.expediente?.id,
+  });
+
+  const mutSubirDoc = useMutation({
+    mutationFn: (formData) => api.post('/documentos', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
+    onSuccess: () => qc.invalidateQueries(['documentos', paciente?.expediente?.id]),
+  });
+
+  const mutEliminarDoc = useMutation({
+    mutationFn: (id) => api.delete(`/documentos/${id}`),
+    onSuccess: () => qc.invalidateQueries(['documentos', paciente?.expediente?.id]),
+  });
+
+  function handleSubirArchivo(e) {
+    const archivo = e.target.files?.[0];
+    if (!archivo) return;
+    const fd = new FormData();
+    fd.append('archivo', archivo);
+    fd.append('expedienteId', exp.id);
+    mutSubirDoc.mutate(fd);
+    e.target.value = '';
+  }
 
   const mutEditarExp = useMutation({
     mutationFn: (data) => api.patch(`/expedientes/${paciente.expediente.id}`, data),
@@ -294,6 +322,61 @@ export default function ExpedientePage() {
                   <CampoExp label="Observaciones generales" valor={exp.observacionesGenerales} />
                 </div>
               )}
+            </div>
+          )}
+        </div>
+
+        {/* Documentos adjuntos */}
+        <div className="bg-white border border-slate-100 rounded-xl overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+            <div className="flex items-center gap-2">
+              <h2 className="text-sm font-semibold text-slate-800">Documentos adjuntos</h2>
+              {documentos.length > 0 && (
+                <span className="text-xs text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
+                  {documentos.length}
+                </span>
+              )}
+            </div>
+            {['medico', 'enfermera', 'secretaria', 'administrador'].includes(usuario?.rol) && exp?.activo && (
+              <label className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-medium transition-colors cursor-pointer ${
+                mutSubirDoc.isPending
+                  ? 'bg-slate-100 text-slate-400'
+                  : 'bg-indigo-600 hover:bg-indigo-700 text-white'
+              }`}>
+                <Upload className="w-3.5 h-3.5" />
+                {mutSubirDoc.isPending ? 'Subiendo...' : 'Subir archivo'}
+                <input
+                  type="file"
+                  className="hidden"
+                  accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx"
+                  onChange={handleSubirArchivo}
+                  disabled={mutSubirDoc.isPending}
+                />
+              </label>
+            )}
+          </div>
+
+          {mutSubirDoc.isError && (
+            <p className="text-xs text-red-600 bg-red-50 px-5 py-2">
+              {mutSubirDoc.error?.response?.data?.message || 'Error al subir el archivo'}
+            </p>
+          )}
+
+          {documentos.length === 0 ? (
+            <div className="py-10 text-center">
+              <Paperclip className="w-6 h-6 text-slate-200 mx-auto mb-2" />
+              <p className="text-sm text-slate-400">Sin documentos adjuntos</p>
+            </div>
+          ) : (
+            <div className="divide-y divide-slate-50">
+              {documentos.map(doc => (
+                <FilaDocumento
+                  key={doc.id}
+                  doc={doc}
+                  puedeEliminar={usuario?.id === doc.subidoPorId || usuario?.rol === 'administrador'}
+                  onEliminar={() => mutEliminarDoc.mutate(doc.id)}
+                />
+              ))}
             </div>
           )}
         </div>
@@ -562,6 +645,44 @@ function SVItem({ label, valor }) {
     <div>
       <p className="text-[10px] text-slate-400 leading-none">{label}</p>
       <p className="text-xs font-semibold text-slate-700 mt-0.5">{valor}</p>
+    </div>
+  );
+}
+
+function FilaDocumento({ doc, puedeEliminar, onEliminar }) {
+  const fecha = new Date(doc.subidoEn).toLocaleDateString('es-GT', {
+    day: '2-digit', month: 'short', year: 'numeric',
+  });
+  const tamano = doc.tamanoBytes < 1024 * 1024
+    ? `${(doc.tamanoBytes / 1024).toFixed(0)} KB`
+    : `${(doc.tamanoBytes / 1024 / 1024).toFixed(1)} MB`;
+
+  return (
+    <div className="flex items-center gap-3 px-5 py-3 hover:bg-slate-50/70 transition-colors">
+      <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center shrink-0">
+        <FileText className="w-4 h-4 text-indigo-500" />
+      </div>
+      <div className="min-w-0 flex-1">
+        <a
+          href={doc.urlStorage}
+          target="_blank"
+          rel="noreferrer"
+          className="text-sm font-medium text-slate-800 hover:text-indigo-600 transition-colors truncate block"
+        >
+          {doc.nombreArchivo}
+        </a>
+        <p className="text-xs text-slate-400 mt-0.5">
+          {doc.descripcion ? `${doc.descripcion} · ` : ''}{tamano} · {fecha} · {doc.subidoPor?.nombreCompleto}
+        </p>
+      </div>
+      {puedeEliminar && (
+        <button
+          onClick={onEliminar}
+          className="p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors shrink-0"
+        >
+          <Trash2 className="w-3.5 h-3.5" />
+        </button>
+      )}
     </div>
   );
 }
