@@ -6,7 +6,27 @@ const authMiddleware = require('../middlewares/authMiddleware');
 
 const router = Router();
 
-// POST /api/auth/login — RF-01
+/**
+ * @swagger
+ * /auth/login:
+ *   post:
+ *     summary: Iniciar sesión
+ *     tags: [Auth]
+ *     security: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [email, password]
+ *             properties:
+ *               email:    { type: string, example: admin@clinica.gt }
+ *               password: { type: string, example: "password123" }
+ *     responses:
+ *       200: { description: Token JWT }
+ *       401: { description: Credenciales incorrectas }
+ */
 router.post('/login', login);
 
 // POST /api/auth/logout — RF-05 (requiere token válido)

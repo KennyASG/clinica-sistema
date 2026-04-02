@@ -42,7 +42,7 @@ app.use(helmet({
   xssFilter: true,
 }));
 
-// Permissions-Policy (no incluido en Helmet, se agrega manualmente)
+// Permissions-Policy
 app.use((_req, res, next) => {
   res.setHeader(
     'Permissions-Policy',
@@ -59,12 +59,12 @@ app.get('/health', (_req, res) => {
   res.json({ ok: true, version: '1.0.0' });
 });
 
-// Swagger UI — solo en desarrollo
-if (process.env.NODE_ENV !== 'production') {
+// Swagger UI — desarrollo
+if (process.env.NODE_ENV === 'development') {
   const swaggerUi   = require('swagger-ui-express');
   const swaggerSpec = require('./config/swagger');
 
-  // Relajar CSP solo para la ruta de docs
+  // CSP solo para la ruta de docs
   app.use('/api/docs', (_req, res, next) => {
     res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;");
     next();
@@ -96,8 +96,6 @@ app.use((err, _req, res, _next) => {
   });
 });
 
-// Solo arranca el servidor si este archivo es el punto de entrada directo.
-// Cuando jest/supertest importa app.js, no levanta el puerto.
 if (require.main === module) {
   const PORT = process.env.PORT || 3000;
   app.listen(PORT, () => {
