@@ -1,32 +1,21 @@
 'use strict';
 
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 
-function crearTransporter() {
-  const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS } = process.env;
-  if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS) return null;
-
-  const port = parseInt(SMTP_PORT || '587');
-  const secure = process.env.SMTP_SECURE === 'true' || port === 465;
-
-  return nodemailer.createTransport({
-    host: SMTP_HOST,
-    port,
-    secure,
-    auth: { user: SMTP_USER, pass: SMTP_PASS },
-    connectionTimeout: 5000,   
-    greetingTimeout:  5000,    
-    socketTimeout:    10000,   
-  });
+function crearCliente() {
+  if (!process.env.RESEND_API_KEY) return null;
+  return new Resend(process.env.RESEND_API_KEY);
 }
+
+const FROM = () => process.env.EMAIL_FROM || 'Clínica Médica <no-reply@clinica.kdevsa.online>';
 
 /**
  * Envía email de confirmación de cita.
- * Si SMTP no está configurado, omite silenciosamente.
+ * Si RESEND_API_KEY no está configurado, omite silenciosamente.
  */
 async function enviarConfirmacionCita({ correo, nombrePaciente, medico, fecha, tipo }) {
-  const transporter = crearTransporter();
-  if (!transporter || !correo) return;
+  const resend = crearCliente();
+  if (!resend || !correo) return;
 
   const fechaFormateada = new Date(fecha).toLocaleString('es-GT', {
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
@@ -34,8 +23,8 @@ async function enviarConfirmacionCita({ correo, nombrePaciente, medico, fecha, t
   });
 
   try {
-    await transporter.sendMail({
-      from: process.env.SMTP_FROM || `"Clínica" <${process.env.SMTP_USER}>`,
+    await resend.emails.send({
+      from: FROM(),
       to: correo,
       subject: 'Confirmación de cita médica',
       text: [
@@ -51,25 +40,24 @@ async function enviarConfirmacionCita({ correo, nombrePaciente, medico, fecha, t
         '',
         'Atentamente,',
         'Clínica Médica',
-      ].filter(l => l !== undefined).join('\n'),
+      ].filter(Boolean).join('\n'),
     });
   } catch (err) {
-    // Email no crítico — loguear pero no lanzar
     console.error('[email] Error al enviar confirmación:', err.message);
   }
 }
 
 /**
  * Envía email de restablecimiento de contraseña.
- * Si SMTP no está configurado, omite silenciosamente.
+ * Si RESEND_API_KEY no está configurado, omite silenciosamente.
  */
 async function enviarResetPassword({ correo, nombreUsuario, linkReset }) {
-  const transporter = crearTransporter();
-  if (!transporter || !correo) return;
+  const resend = crearCliente();
+  if (!resend || !correo) return;
 
   try {
-    await transporter.sendMail({
-      from: process.env.SMTP_FROM || `"Clínica" <${process.env.SMTP_USER}>`,
+    await resend.emails.send({
+      from: FROM(),
       to: correo,
       subject: 'Restablecimiento de contraseña',
       text: [
