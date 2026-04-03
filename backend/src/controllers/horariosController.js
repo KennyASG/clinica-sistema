@@ -1,15 +1,10 @@
 'use strict';
-const prisma = require('../utils/prismaClient');
+const svc = require('../services/horariosService');
 
 // GET /api/horarios?medicoId=
 async function listar(req, res, next) {
   try {
-    const { medicoId } = req.query;
-    const horarios = await prisma.horarioMedico.findMany({
-      where: { ...(medicoId && { medicoId }), activo: true },
-      orderBy: [{ medicoId: 'asc' }, { dia: 'asc' }],
-      include: { medico: { select: { nombreCompleto: true } } },
-    });
+    const horarios = await svc.listar(req.query.medicoId);
     return res.json(horarios);
   } catch (err) { next(err); }
 }
@@ -17,11 +12,7 @@ async function listar(req, res, next) {
 // POST /api/horarios
 async function crear(req, res, next) {
   try {
-    const { medicoId, dia, horaInicio, horaFin, duracionCitaMin } = req.body;
-    const horario = await prisma.horarioMedico.create({
-      data: { medicoId, dia, horaInicio, horaFin, duracionCitaMin: duracionCitaMin ?? 30 },
-      include: { medico: { select: { nombreCompleto: true } } },
-    });
+    const horario = await svc.crear(req.body);
     return res.status(201).json(horario);
   } catch (err) { next(err); }
 }
@@ -29,16 +20,7 @@ async function crear(req, res, next) {
 // PATCH /api/horarios/:id
 async function editar(req, res, next) {
   try {
-    const { horaInicio, horaFin, duracionCitaMin, activo } = req.body;
-    const horario = await prisma.horarioMedico.update({
-      where: { id: req.params.id },
-      data: {
-        ...(horaInicio      !== undefined && { horaInicio }),
-        ...(horaFin         !== undefined && { horaFin }),
-        ...(duracionCitaMin !== undefined && { duracionCitaMin }),
-        ...(activo          !== undefined && { activo }),
-      },
-    });
+    const horario = await svc.editar(req.params.id, req.body);
     return res.json(horario);
   } catch (err) { next(err); }
 }
@@ -46,7 +28,7 @@ async function editar(req, res, next) {
 // DELETE /api/horarios/:id  (soft delete)
 async function desactivar(req, res, next) {
   try {
-    await prisma.horarioMedico.update({ where: { id: req.params.id }, data: { activo: false } });
+    await svc.desactivar(req.params.id);
     return res.json({ ok: true });
   } catch (err) { next(err); }
 }

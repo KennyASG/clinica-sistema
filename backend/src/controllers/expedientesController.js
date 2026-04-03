@@ -1,33 +1,15 @@
 'use strict';
-
-const prisma = require('../utils/prismaClient');
+const svc = require('../services/expedientesService');
 const errorResponse = require('../utils/errorResponse');
-const registrarAuditoria = require('../utils/auditoria');
 const { editarExpedienteSchema } = require('../validators/expedientes');
 
 // GET /api/expedientes/:id
 async function obtener(req, res, next) {
   try {
-    const expediente = await prisma.expediente.findUnique({
-      where: { id: req.params.id },
-      include: {
-        paciente: {
-          select: {
-            id: true, nombreCompleto: true, dpi: true,
-            fechaNacimiento: true, sexo: true, telefono: true,
-            telefonoEmergencia: true, contactoEmergencia: true,
-            correo: true, activo: true,
-          },
-        },
-      },
-    });
-
-    if (!expediente) {
-      return res.status(404).json(errorResponse('Expediente no encontrado', 'NOT_FOUND'));
-    }
-
+    const expediente = await svc.obtener(req.params.id);
     return res.json(expediente);
   } catch (err) {
+    if (err.status) return res.status(err.status).json(errorResponse(err.message, err.code));
     next(err);
   }
 }
@@ -39,44 +21,15 @@ async function editar(req, res, next) {
     if (!parsed.success) {
       return res.status(422).json(errorResponse(parsed.error.issues[0].message, 'VALIDATION_ERROR'));
     }
-    const datos = parsed.data;
-
-    const expediente = await prisma.expediente.findUnique({ where: { id: req.params.id } });
-    if (!expediente) {
-      return res.status(404).json(errorResponse('Expediente no encontrado', 'NOT_FOUND'));
-    }
-
-    // Sincroniza flag tiene_alergias cuando se actualiza el campo alergias (RF-15)
-    if ('alergias' in datos) {
-      datos.tieneAlergias = !!(datos.alergias && datos.alergias.trim().length > 0);
-    }
-
-    datos.actualizadoPorId = req.user.id;
-
     const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-
-    const actualizado = await prisma.$transaction(async (tx) => {
-      const e = await tx.expediente.update({
-        where: { id: req.params.id },
-        data: datos,
-      });
-
-      await registrarAuditoria(tx, {
-        usuarioId: req.user.id,
-        accion: 'UPDATE',
-        tablaAfectada: 'expediente',
-        registroId: e.id,
-        datosAnteriores: { tieneAlergias: expediente.tieneAlergias, activo: expediente.activo },
-        datosNuevos: { tieneAlergias: e.tieneAlergias, activo: e.activo },
-        ip,
-        userAgent: req.headers['user-agent'],
-      });
-
-      return e;
+    const actualizado = await svc.editar(req.params.id, parsed.data, {
+      usuarioId: req.user.id,
+      ip,
+      userAgent: req.headers['user-agent'],
     });
-
     return res.json(actualizado);
   } catch (err) {
+    if (err.status) return res.status(err.status).json(errorResponse(err.message, err.code));
     next(err);
   }
 }
@@ -88,61 +41,21 @@ function metodNoPermitido(_req, res) {
   );
 }
 
-// GET /api/expedientes/:id/historial — RF-14 (más reciente primero)
+// GET /api/expedientes/:id/historial — RF-14
 async function historial(req, res, next) {
   try {
-    const expediente = await prisma.expediente.findUnique({
-      where: { id: req.params.id },
-      select: { id: true },
-    });
-    if (!expediente) {
-      return res.status(404).json(errorResponse('Expediente no encontrado', 'NOT_FOUND'));
-    }
-
-    const consultas = await prisma.consulta.findMany({
-      where: { expedienteId: req.params.id },
-      include: {
-        medico: {
-          select: { id: true, nombreCompleto: true, rol: true },
-        },
-        cita: {
-          include: {
-            tipoConsulta: { select: { nombre: true } },
-            signosVitales: {
-              select: {
-                presionArterial: true, temperaturaC: true, pesoKg: true,
-                tallaCm: true, frecuenciaCardiaca: true, saturacionO2: true,
-                glucosaMgdl: true, observaciones: true,
-              },
-            },
-          },
-        },
-      },
-      orderBy: { fechaHora: 'desc' },
-    });
-
+    const consultas = await svc.historial(req.params.id);
     return res.json(consultas);
   } catch (err) {
+    if (err.status) return res.status(err.status).json(errorResponse(err.message, err.code));
     next(err);
   }
 }
 
-// GET /api/expedientes/recientes — últimos 8 expedientes modificados
-async function recientes(req, res, next) {
+// GET /api/expedientes/recientes
+async function recientes(_req, res, next) {
   try {
-    const expedientes = await prisma.expediente.findMany({
-      where: { activo: true },
-      orderBy: { actualizadoEn: 'desc' },
-      take: 8,
-      select: {
-        id: true,
-        tieneAlergias: true,
-        actualizadoEn: true,
-        paciente: {
-          select: { id: true, nombreCompleto: true, sexo: true, fechaNacimiento: true },
-        },
-      },
-    });
+    const expedientes = await svc.recientes();
     return res.json(expedientes);
   } catch (err) {
     next(err);

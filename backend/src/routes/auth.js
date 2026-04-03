@@ -29,6 +29,80 @@ const router = Router();
  */
 router.post('/login', login);
 
+/**
+ * @swagger
+ * /auth/logout:
+ *   post:
+ *     summary: Cerrar sesión — RF-05
+ *     tags: [Auth]
+ *     responses:
+ *       200:
+ *         description: Sesión cerrada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 ok: { type: boolean }
+ *
+ * /auth/refresh:
+ *   post:
+ *     summary: Renovar token JWT antes de que expire
+ *     tags: [Auth]
+ *     responses:
+ *       200:
+ *         description: Nuevo token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 token: { type: string }
+ *
+ * /auth/forgot-password:
+ *   post:
+ *     summary: Solicitar enlace de restablecimiento de contraseña
+ *     tags: [Auth]
+ *     security: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [email]
+ *             properties:
+ *               email: { type: string, format: email }
+ *     responses:
+ *       200:
+ *         description: Respuesta siempre exitosa (no revela si el email existe)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 ok: { type: boolean }
+ *
+ * /auth/reset-password:
+ *   post:
+ *     summary: Aplicar nueva contraseña con token de reset
+ *     tags: [Auth]
+ *     security: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [token, password]
+ *             properties:
+ *               token:    { type: string, description: "Token JWT recibido por correo" }
+ *               password: { type: string, example: "NuevaSegura123!" }
+ *     responses:
+ *       200: { description: Contraseña actualizada }
+ *       400: { description: Token expirado o inválido }
+ *       422: { description: Error de validación }
+ */
 // POST /api/auth/logout — RF-05 (requiere token válido)
 router.post('/logout', authMiddleware, logout);
 

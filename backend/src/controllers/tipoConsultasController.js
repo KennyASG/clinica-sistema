@@ -1,46 +1,30 @@
 'use strict';
-const prisma = require('../utils/prismaClient');
+const svc = require('../services/tipoConsultasService');
 
 async function listar(_req, res, next) {
   try {
-    const tipos = await prisma.tipoConsulta.findMany({
-      where: { activo: true },
-      orderBy: { nombre: 'asc' },
-      select: { id: true, nombre: true, duracionMinutos: true, descripcion: true },
-    });
+    const tipos = await svc.listar();
     return res.json(tipos);
   } catch (err) { next(err); }
 }
 
 async function crear(req, res, next) {
   try {
-    const { nombre, descripcion, duracionMinutos } = req.body;
-    const tipo = await prisma.tipoConsulta.create({
-      data: { nombre, descripcion, duracionMinutos: duracionMinutos ?? 30 },
-    });
+    const tipo = await svc.crear(req.body);
     return res.status(201).json(tipo);
   } catch (err) { next(err); }
 }
 
 async function editar(req, res, next) {
   try {
-    const { nombre, descripcion, duracionMinutos, activo } = req.body;
-    const tipo = await prisma.tipoConsulta.update({
-      where: { id: req.params.id },
-      data: {
-        ...(nombre          !== undefined && { nombre }),
-        ...(descripcion     !== undefined && { descripcion }),
-        ...(duracionMinutos !== undefined && { duracionMinutos }),
-        ...(activo          !== undefined && { activo }),
-      },
-    });
+    const tipo = await svc.editar(req.params.id, req.body);
     return res.json(tipo);
   } catch (err) { next(err); }
 }
 
 async function desactivar(req, res, next) {
   try {
-    await prisma.tipoConsulta.update({ where: { id: req.params.id }, data: { activo: false } });
+    await svc.desactivar(req.params.id);
     return res.json({ ok: true });
   } catch (err) { next(err); }
 }

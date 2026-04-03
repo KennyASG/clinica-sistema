@@ -66,7 +66,7 @@ if (process.env.NODE_ENV === 'development') {
 
   // CSP solo para la ruta de docs
   app.use('/api/docs', (_req, res, next) => {
-    res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;");
+    res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; worker-src blob:;");
     next();
   });
   app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
