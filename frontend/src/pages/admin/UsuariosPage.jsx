@@ -126,7 +126,7 @@ export default function UsuariosPage() {
 
       {/* Tabla */}
       <div className="bg-white border border-slate-100 rounded-xl overflow-hidden">
-        <div className="grid grid-cols-[1fr_200px_120px_100px_160px_80px] gap-4 px-5 py-2.5 bg-slate-50 border-b border-slate-100">
+        <div className="hidden md:grid grid-cols-[1fr_200px_120px_100px_160px_80px] gap-4 px-5 py-2.5 bg-slate-50 border-b border-slate-100">
           {['Usuario', 'Email', 'Rol', 'Estado', 'Último acceso', ''].map(col => (
             <p key={col} className="text-xs font-semibold text-slate-400 uppercase tracking-wide">{col}</p>
           ))}
@@ -261,69 +261,93 @@ function FilaUsuario({ usuario: u, onEditar, onToggle }) {
   const especialidadPrincipal = u.especialidades?.find(e => e.esPrincipal)?.especialidad?.nombre
     || u.especialidades?.[0]?.especialidad?.nombre;
 
+  const menuBtn = (
+    <div className="relative">
+      <button
+        onClick={() => setMenu(m => !m)}
+        className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+      >
+        <MoreHorizontal className="w-4 h-4" />
+      </button>
+      {menu && (
+        <>
+          <div className="fixed inset-0 z-10" onClick={() => setMenu(false)} />
+          <div className="absolute right-0 mt-1 w-36 bg-white border border-slate-200 rounded-xl shadow-lg z-20 py-1 overflow-hidden">
+            <button
+              onClick={() => { setMenu(false); onEditar(); }}
+              className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-2"
+            >
+              <Pencil className="w-3.5 h-3.5" />
+              Editar
+            </button>
+            <button
+              onClick={() => { setMenu(false); onToggle(); }}
+              className="w-full text-left px-4 py-2 text-sm hover:bg-slate-50 flex items-center gap-2 text-slate-700"
+            >
+              {u.activo ? 'Desactivar' : 'Activar'}
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+
   return (
-    <div className={`grid grid-cols-[1fr_200px_120px_100px_160px_80px] gap-4 px-5 py-3.5 items-center hover:bg-slate-50/70 transition-colors ${!u.activo ? 'opacity-50' : ''}`}>
-      <div className="flex items-center gap-3 min-w-0">
-        <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-semibold flex-shrink-0">
+    <>
+      {/* Desktop */}
+      <div className={`hidden md:grid grid-cols-[1fr_200px_120px_100px_160px_80px] gap-4 px-5 py-3.5 items-center hover:bg-slate-50/70 transition-colors ${!u.activo ? 'opacity-50' : ''}`}>
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-semibold shrink-0">
+            {iniciales(u.nombreCompleto)}
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm font-medium text-slate-800 truncate">{u.nombreCompleto}</p>
+            {u.rol === 'medico' && especialidadPrincipal ? (
+              <p className="text-xs text-slate-400 truncate">{especialidadPrincipal}</p>
+            ) : u.numeroColegiado ? (
+              <p className="text-xs text-slate-400">Col. {u.numeroColegiado}</p>
+            ) : null}
+          </div>
+        </div>
+        <p className="text-sm text-slate-500 truncate">{u.email}</p>
+        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${rolCfg.cls}`}>
+          {u.rol}
+        </span>
+        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+          u.activo
+            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+            : 'bg-slate-100 text-slate-400 border border-slate-200'
+        }`}>
+          {u.activo ? 'Activo' : 'Inactivo'}
+        </span>
+        <p className="text-xs text-slate-400">{ultimoAcceso}</p>
+        <div className="flex justify-end">{menuBtn}</div>
+      </div>
+
+      {/* Móvil */}
+      <div className={`md:hidden flex items-center gap-3 px-4 py-3 hover:bg-slate-50/70 transition-colors ${!u.activo ? 'opacity-50' : ''}`}>
+        <div className="w-9 h-9 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-semibold shrink-0">
           {iniciales(u.nombreCompleto)}
         </div>
-        <div className="min-w-0">
+        <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-slate-800 truncate">{u.nombreCompleto}</p>
-          {u.rol === 'medico' && especialidadPrincipal ? (
-            <p className="text-xs text-slate-400 truncate">{especialidadPrincipal}</p>
-          ) : u.numeroColegiado ? (
-            <p className="text-xs text-slate-400">Col. {u.numeroColegiado}</p>
-          ) : null}
+          <p className="text-xs text-slate-400 truncate">{u.email}</p>
+          <div className="flex items-center gap-2 mt-1">
+            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium capitalize ${rolCfg.cls}`}>
+              {u.rol}
+            </span>
+            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+              u.activo
+                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                : 'bg-slate-100 text-slate-400 border border-slate-200'
+            }`}>
+              {u.activo ? 'Activo' : 'Inactivo'}
+            </span>
+          </div>
         </div>
+        {menuBtn}
       </div>
-
-      <p className="text-sm text-slate-500 truncate">{u.email}</p>
-
-      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${rolCfg.cls}`}>
-        {u.rol}
-      </span>
-
-      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-        u.activo
-          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-          : 'bg-slate-100 text-slate-400 border border-slate-200'
-      }`}>
-        {u.activo ? 'Activo' : 'Inactivo'}
-      </span>
-
-      <p className="text-xs text-slate-400">{ultimoAcceso}</p>
-
-      <div className="flex justify-end">
-        <div className="relative">
-          <button
-            onClick={() => setMenu(m => !m)}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
-          >
-            <MoreHorizontal className="w-4 h-4" />
-          </button>
-          {menu && (
-            <>
-              <div className="fixed inset-0 z-10" onClick={() => setMenu(false)} />
-              <div className="absolute right-0 mt-1 w-36 bg-white border border-slate-200 rounded-xl shadow-lg z-20 py-1 overflow-hidden">
-                <button
-                  onClick={() => { setMenu(false); onEditar(); }}
-                  className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-2"
-                >
-                  <Pencil className="w-3.5 h-3.5" />
-                  Editar
-                </button>
-                <button
-                  onClick={() => { setMenu(false); onToggle(); }}
-                  className="w-full text-left px-4 py-2 text-sm hover:bg-slate-50 flex items-center gap-2 text-slate-700"
-                >
-                  {u.activo ? 'Desactivar' : 'Activar'}
-                </button>
-              </div>
-            </>
-          )}
-        </div>
-      </div>
-    </div>
+    </>
   );
 }
 

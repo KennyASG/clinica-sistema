@@ -175,7 +175,7 @@ export default function CitasPage() {
           </div>
 
           {/* Cabecera columnas */}
-          <div className="grid grid-cols-[90px_1fr_160px_120px] gap-4 px-5 py-2.5 bg-slate-50 border-b border-slate-100">
+          <div className="hidden md:grid grid-cols-[90px_1fr_160px_120px] gap-4 px-5 py-2.5 bg-slate-50 border-b border-slate-100">
             {['Hora', 'Paciente', 'Médico / Tipo', 'Estado'].map(col => (
               <p key={col} className="text-xs font-semibold text-slate-400 uppercase tracking-wide">{col}</p>
             ))}
@@ -254,50 +254,63 @@ function FilaCita({ cita, seleccionada, onClick }) {
   const horaFin    = fin.toLocaleTimeString('es-GT', { hour: '2-digit', minute: '2-digit' });
   const esTerminal = TERMINALES.includes(cita.estado);
 
-  return (
-    <div
-      onClick={onClick}
-      className={`grid grid-cols-[90px_1fr_160px_120px] gap-4 px-5 py-3 items-center cursor-pointer transition-colors ${
-        seleccionada
-          ? 'bg-indigo-50/60 border-l-2 border-indigo-500'
-          : `hover:bg-slate-50/70 ${esTerminal ? 'opacity-55' : ''}`
-      }`}
-    >
-      {/* Hora */}
-      <div>
-        <p className="text-sm font-medium text-slate-700">{horaInicio}</p>
-        <p className="text-xs text-slate-400">{horaFin}</p>
-      </div>
+  const baseCls = seleccionada
+    ? 'bg-indigo-50/60 border-l-2 border-indigo-500'
+    : `hover:bg-slate-50/70 ${esTerminal ? 'opacity-55' : ''}`;
+  const avatarCls = seleccionada ? 'bg-indigo-200 text-indigo-800' : 'bg-indigo-100 text-indigo-700';
 
-      {/* Paciente */}
-      <div className="flex items-center gap-2.5 min-w-0">
-        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold shrink-0 ${
-          seleccionada ? 'bg-indigo-200 text-indigo-800' : 'bg-indigo-100 text-indigo-700'
-        }`}>
-          {iniciales(cita.paciente?.nombreCompleto)}
+  return (
+    <div onClick={onClick} className={`cursor-pointer transition-colors ${baseCls}`}>
+      {/* Desktop */}
+      <div className="hidden md:grid grid-cols-[90px_1fr_160px_120px] gap-4 px-5 py-3 items-center">
+        <div>
+          <p className="text-sm font-medium text-slate-700">{horaInicio}</p>
+          <p className="text-xs text-slate-400">{horaFin}</p>
+        </div>
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold shrink-0 ${avatarCls}`}>
+            {iniciales(cita.paciente?.nombreCompleto)}
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm font-medium text-slate-800 truncate">{cita.paciente?.nombreCompleto}</p>
+            {cita.notasSecretaria && (
+              <p className="text-xs text-slate-400 truncate italic">{cita.notasSecretaria}</p>
+            )}
+          </div>
         </div>
         <div className="min-w-0">
-          <p className="text-sm font-medium text-slate-800 truncate">{cita.paciente?.nombreCompleto}</p>
-          {cita.notasSecretaria && (
-            <p className="text-xs text-slate-400 truncate italic">{cita.notasSecretaria}</p>
+          <p className="text-sm text-slate-600 truncate">Dr. {cita.medico?.nombreCompleto}</p>
+          {cita.medico?.especialidades?.[0]?.especialidad?.nombre && (
+            <p className="text-xs text-indigo-400 truncate">{cita.medico.especialidades[0].especialidad.nombre}</p>
+          )}
+        </div>
+        <div className="flex items-center gap-1.5">
+          <EstadoPill estado={cita.estado} />
+          {cita.signosVitales && (
+            <Activity className="w-3.5 h-3.5 text-emerald-500 shrink-0" title="Signos vitales registrados" />
           )}
         </div>
       </div>
 
-      {/* Médico / Tipo */}
-      <div className="min-w-0">
-        <p className="text-sm text-slate-600 truncate">Dr. {cita.medico?.nombreCompleto}</p>
-        {cita.medico?.especialidades?.[0]?.especialidad?.nombre && (
-          <p className="text-xs text-indigo-400 truncate">{cita.medico.especialidades[0].especialidad.nombre}</p>
-        )}
-      </div>
-
-      {/* Estado + SV indicator */}
-      <div className="flex items-center gap-1.5">
-        <EstadoPill estado={cita.estado} />
-        {cita.signosVitales && (
-          <Activity className="w-3.5 h-3.5 text-emerald-500 shrink-0" title="Signos vitales registrados" />
-        )}
+      {/* Móvil */}
+      <div className="md:hidden flex items-center gap-3 px-4 py-3">
+        <div className="text-center shrink-0 w-12">
+          <p className="text-sm font-semibold text-slate-700">{horaInicio}</p>
+          <p className="text-xs text-slate-400">{horaFin}</p>
+        </div>
+        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold shrink-0 ${avatarCls}`}>
+          {iniciales(cita.paciente?.nombreCompleto)}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium text-slate-800 truncate">{cita.paciente?.nombreCompleto}</p>
+          <p className="text-xs text-slate-400 truncate">Dr. {cita.medico?.nombreCompleto}</p>
+        </div>
+        <div className="shrink-0 flex items-center gap-1">
+          <EstadoPill estado={cita.estado} />
+          {cita.signosVitales && (
+            <Activity className="w-3.5 h-3.5 text-emerald-500" />
+          )}
+        </div>
       </div>
     </div>
   );

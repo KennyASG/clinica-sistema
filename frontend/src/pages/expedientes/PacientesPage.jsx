@@ -137,7 +137,7 @@ export default function PacientesPage() {
           </div>
         ) : resultados.length > 0 ? (
           <div className="bg-white border border-slate-100 rounded-xl overflow-hidden">
-            <div className="grid grid-cols-[1fr_160px_130px_40px] gap-4 px-5 py-2.5 bg-slate-50 border-b border-slate-100">
+            <div className="hidden md:grid grid-cols-[1fr_160px_130px_40px] gap-4 px-5 py-2.5 bg-slate-50 border-b border-slate-100">
               {['Paciente', 'DPI', 'Teléfono', ''].map(col => (
                 <p key={col} className="text-xs font-semibold text-slate-400 uppercase tracking-wide">{col}</p>
               ))}
@@ -220,29 +220,38 @@ export default function PacientesPage() {
 }
 
 function FilaPaciente({ paciente: p, seleccionado, onClick }) {
+  const baseCls = seleccionado ? 'bg-indigo-50/60 border-l-2 border-indigo-500' : 'hover:bg-slate-50/70';
+  const avatarCls = seleccionado ? 'bg-indigo-200 text-indigo-800' : 'bg-indigo-100 text-indigo-700';
+
   return (
-    <div
-      onClick={onClick}
-      className={`grid grid-cols-[1fr_160px_130px_40px] gap-4 px-5 py-3.5 items-center cursor-pointer transition-colors ${
-        seleccionado
-          ? 'bg-indigo-50/60 border-l-2 border-indigo-500'
-          : 'hover:bg-slate-50/70'
-      }`}
-    >
-      <div className="flex items-center gap-3 min-w-0">
-        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold flex-shrink-0 ${
-          seleccionado ? 'bg-indigo-200 text-indigo-800' : 'bg-indigo-100 text-indigo-700'
-        }`}>
+    <div onClick={onClick} className={`cursor-pointer transition-colors ${baseCls}`}>
+      {/* Desktop */}
+      <div className="hidden md:grid grid-cols-[1fr_160px_130px_40px] gap-4 px-5 py-3.5 items-center">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold shrink-0 ${avatarCls}`}>
+            {iniciales(p.nombreCompleto)}
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm font-medium text-slate-800 truncate">{p.nombreCompleto}</p>
+            <p className="text-xs text-slate-400 capitalize">{p.sexo}</p>
+          </div>
+        </div>
+        <p className="text-xs font-mono text-slate-500">{p.dpi}</p>
+        <p className="text-sm text-slate-500">{p.telefono || '—'}</p>
+        <ChevronRight className={`w-4 h-4 ${seleccionado ? 'text-indigo-400' : 'text-slate-300'}`} />
+      </div>
+
+      {/* Móvil */}
+      <div className="md:hidden flex items-center gap-3 px-4 py-3">
+        <div className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-semibold shrink-0 ${avatarCls}`}>
           {iniciales(p.nombreCompleto)}
         </div>
-        <div className="min-w-0">
+        <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-slate-800 truncate">{p.nombreCompleto}</p>
-          <p className="text-xs text-slate-400 capitalize">{p.sexo}</p>
+          <p className="text-xs text-slate-400">{p.dpi} · {p.telefono || '—'}</p>
         </div>
+        <ChevronRight className={`w-4 h-4 shrink-0 ${seleccionado ? 'text-indigo-400' : 'text-slate-300'}`} />
       </div>
-      <p className="text-xs font-mono text-slate-500">{p.dpi}</p>
-      <p className="text-sm text-slate-500">{p.telefono || '—'}</p>
-      <ChevronRight className={`w-4 h-4 ${seleccionado ? 'text-indigo-400' : 'text-slate-300'}`} />
     </div>
   );
 }
