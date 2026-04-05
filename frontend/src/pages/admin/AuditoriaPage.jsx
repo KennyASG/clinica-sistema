@@ -124,7 +124,7 @@ export default function AuditoriaPage() {
           )}
         </div>
 
-        <div className="grid grid-cols-[170px_130px_100px_120px_1fr] gap-4 px-5 py-2.5 bg-slate-50 border-b border-slate-100">
+        <div className="hidden md:grid grid-cols-[170px_130px_100px_120px_1fr] gap-4 px-5 py-2.5 bg-slate-50 border-b border-slate-100">
           {['Fecha', 'Usuario', 'Acción', 'Tabla', 'IP'].map(col => (
             <p key={col} className="text-xs font-semibold text-slate-400 uppercase tracking-wide">{col}</p>
           ))}
@@ -148,20 +148,34 @@ export default function AuditoriaPage() {
                 <div
                   key={r.id}
                   onClick={() => tieneDetalle && setDetalle(detalle?.id === r.id ? null : r)}
-                  className={`grid grid-cols-[170px_130px_100px_120px_1fr] gap-4 px-5 py-3 items-center transition-colors ${
-                    tieneDetalle ? 'cursor-pointer hover:bg-slate-50/70' : ''
-                  } ${detalle?.id === r.id ? 'bg-indigo-50/50' : ''}`}
+                  className={`transition-colors ${tieneDetalle ? 'cursor-pointer hover:bg-slate-50/70' : ''} ${detalle?.id === r.id ? 'bg-indigo-50/50' : ''}`}
                 >
-                  <p className="text-xs font-mono text-slate-500">{fmtFecha(r.fechaHora)}</p>
-                  <div className="min-w-0">
-                    <p className="text-xs font-medium text-slate-700 truncate">{r.usuario?.nombreCompleto}</p>
-                    <p className="text-xs text-slate-400 capitalize">{r.usuario?.rol}</p>
+                  {/* Desktop */}
+                  <div className="hidden md:grid grid-cols-[170px_130px_100px_120px_1fr] gap-4 px-5 py-3 items-center">
+                    <p className="text-xs font-mono text-slate-500">{fmtFecha(r.fechaHora)}</p>
+                    <div className="min-w-0">
+                      <p className="text-xs font-medium text-slate-700 truncate">{r.usuario?.nombreCompleto}</p>
+                      <p className="text-xs text-slate-400 capitalize">{r.usuario?.rol}</p>
+                    </div>
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${accionCfg.cls}`}>
+                      {r.accion}
+                    </span>
+                    <p className="text-xs text-slate-500 font-mono">{r.tablaAfectada ?? '—'}</p>
+                    <p className="text-xs font-mono text-slate-400">{r.ipAddress ?? '—'}</p>
                   </div>
-                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${accionCfg.cls}`}>
-                    {r.accion}
-                  </span>
-                  <p className="text-xs text-slate-500 font-mono">{r.tablaAfectada ?? '—'}</p>
-                  <p className="text-xs font-mono text-slate-400">{r.ipAddress ?? '—'}</p>
+                  {/* Móvil */}
+                  <div className="md:hidden flex items-center gap-3 px-4 py-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${accionCfg.cls}`}>
+                          {r.accion}
+                        </span>
+                        <p className="text-xs font-mono text-slate-500">{r.tablaAfectada ?? '—'}</p>
+                      </div>
+                      <p className="text-xs font-medium text-slate-700 truncate mt-0.5">{r.usuario?.nombreCompleto}</p>
+                      <p className="text-xs font-mono text-slate-400">{fmtFecha(r.fechaHora)}</p>
+                    </div>
+                  </div>
                 </div>
               );
             })}

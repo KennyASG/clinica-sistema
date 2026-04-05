@@ -42,7 +42,7 @@ function Iniciales({ nombre }) {
   return ini.toUpperCase();
 }
 
-export default function Sidebar() {
+export default function Sidebar({ open = false, onClose = () => {} }) {
   const { usuario, logout } = useAuth();
   const navigate = useNavigate();
   const links = NAV_POR_ROL[usuario?.rol] ?? [];
@@ -53,7 +53,12 @@ export default function Sidebar() {
   }
 
   return (
-    <aside className="w-56 flex-shrink-0 bg-white border-r border-slate-100 flex flex-col min-h-screen">
+    <aside className={`
+      fixed inset-y-0 left-0 z-30 w-56 shrink-0 bg-white border-r border-slate-100 flex flex-col min-h-screen
+      transition-transform duration-200
+      ${open ? 'translate-x-0' : '-translate-x-full'}
+      md:static md:translate-x-0
+    `}>
       {/* Logo */}
       <div className="px-5 py-5 border-b border-slate-100 flex items-center gap-2.5">
         <div className="w-7 h-7 bg-indigo-600 rounded-md flex items-center justify-center flex-shrink-0">
@@ -68,6 +73,7 @@ export default function Sidebar() {
           <NavLink
             key={to}
             to={to}
+            onClick={onClose}
             className={({ isActive }) =>
               `flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
                 isActive

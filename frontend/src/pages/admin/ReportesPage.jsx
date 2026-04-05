@@ -230,7 +230,7 @@ function TablaCitas({ citas }) {
   });
   return (
     <div className="bg-white border border-slate-100 rounded-xl overflow-hidden">
-      <div className="grid grid-cols-[160px_1fr_1fr_120px] gap-4 px-5 py-2.5 bg-slate-50 border-b border-slate-100">
+      <div className="hidden md:grid grid-cols-[160px_1fr_1fr_120px] gap-4 px-5 py-2.5 bg-slate-50 border-b border-slate-100">
         {['Fecha / Hora', 'Paciente', 'Médico', 'Estado'].map(col => (
           <p key={col} className="text-xs font-semibold text-slate-400 uppercase tracking-wide">{col}</p>
         ))}
@@ -239,11 +239,20 @@ function TablaCitas({ citas }) {
         {citas.map(c => {
           const cfg = ESTADO_CONFIG[c.estado] ?? { label: c.estado, cls: 'bg-slate-100 text-slate-500 border border-slate-200' };
           return (
-            <div key={c.id} className="grid grid-cols-[160px_1fr_1fr_120px] gap-4 px-5 py-3 items-center">
-              <p className="text-xs font-mono text-slate-500">{fmtFecha(c.fechaHoraInicio)}</p>
-              <p className="text-sm text-slate-700 truncate">{c.paciente?.nombreCompleto}</p>
-              <p className="text-sm text-slate-500 truncate">Dr. {c.medico?.nombreCompleto}</p>
-              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${cfg.cls}`}>{cfg.label}</span>
+            <div key={c.id}>
+              <div className="hidden md:grid grid-cols-[160px_1fr_1fr_120px] gap-4 px-5 py-3 items-center">
+                <p className="text-xs font-mono text-slate-500">{fmtFecha(c.fechaHoraInicio)}</p>
+                <p className="text-sm text-slate-700 truncate">{c.paciente?.nombreCompleto}</p>
+                <p className="text-sm text-slate-500 truncate">Dr. {c.medico?.nombreCompleto}</p>
+                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${cfg.cls}`}>{cfg.label}</span>
+              </div>
+              <div className="md:hidden flex items-center justify-between gap-3 px-4 py-3">
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-slate-700 truncate">{c.paciente?.nombreCompleto}</p>
+                  <p className="text-xs text-slate-400 truncate">Dr. {c.medico?.nombreCompleto} · {fmtFecha(c.fechaHoraInicio)}</p>
+                </div>
+                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium shrink-0 ${cfg.cls}`}>{cfg.label}</span>
+              </div>
             </div>
           );
         })}
@@ -274,20 +283,29 @@ function TablaPacientes({ consultas, porMedico }) {
 
       {/* Lista de consultas */}
       <div className="bg-white border border-slate-100 rounded-xl overflow-hidden">
-        <div className="grid grid-cols-[120px_1fr_1fr_100px] gap-4 px-5 py-2.5 bg-slate-50 border-b border-slate-100">
+        <div className="hidden md:grid grid-cols-[120px_1fr_1fr_100px] gap-4 px-5 py-2.5 bg-slate-50 border-b border-slate-100">
           {['Fecha', 'Paciente', 'Médico', 'CIE-10'].map(col => (
             <p key={col} className="text-xs font-semibold text-slate-400 uppercase tracking-wide">{col}</p>
           ))}
         </div>
         <div className="divide-y divide-slate-50">
           {consultas.map(c => (
-            <div key={c.id} className="grid grid-cols-[120px_1fr_1fr_100px] gap-4 px-5 py-3 items-center">
-              <p className="text-xs font-mono text-slate-500">
-                {new Date(c.fechaHora).toLocaleDateString('es-GT')}
-              </p>
-              <p className="text-sm text-slate-700 truncate">{c.expediente?.paciente?.nombreCompleto}</p>
-              <p className="text-sm text-slate-500 truncate">Dr. {c.medico?.nombreCompleto}</p>
-              <p className="text-xs font-mono text-indigo-600">{c.diagnosticoCie10 || '—'}</p>
+            <div key={c.id}>
+              <div className="hidden md:grid grid-cols-[120px_1fr_1fr_100px] gap-4 px-5 py-3 items-center">
+                <p className="text-xs font-mono text-slate-500">
+                  {new Date(c.fechaHora).toLocaleDateString('es-GT')}
+                </p>
+                <p className="text-sm text-slate-700 truncate">{c.expediente?.paciente?.nombreCompleto}</p>
+                <p className="text-sm text-slate-500 truncate">Dr. {c.medico?.nombreCompleto}</p>
+                <p className="text-xs font-mono text-indigo-600">{c.diagnosticoCie10 || '—'}</p>
+              </div>
+              <div className="md:hidden flex items-center justify-between gap-3 px-4 py-3">
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-slate-700 truncate">{c.expediente?.paciente?.nombreCompleto}</p>
+                  <p className="text-xs text-slate-400 truncate">Dr. {c.medico?.nombreCompleto} · {new Date(c.fechaHora).toLocaleDateString('es-GT')}</p>
+                </div>
+                <p className="text-xs font-mono text-indigo-600 shrink-0">{c.diagnosticoCie10 || '—'}</p>
+              </div>
             </div>
           ))}
         </div>

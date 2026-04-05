@@ -12,7 +12,7 @@ const AuthContext = createContext(null);
 function jwtExp(token) {
   try {
     const payload = JSON.parse(atob(token.split('.')[1]));
-    return payload.exp ?? null; // segundos epoch, o null si no tiene exp
+    return payload.exp ?? null; 
   } catch {
     return null;
   }
@@ -21,7 +21,7 @@ function jwtExp(token) {
 function tokenEsValido(token) {
   if (!token) return false;
   const exp = jwtExp(token);
-  if (exp === null) return true; // token sin exp (app móvil) → válido
+  if (exp === null) return true; 
   return Date.now() / 1000 < exp;
 }
 
@@ -62,11 +62,11 @@ export function AuthProvider({ children }) {
     setUsuario(null);
   }, [cancelarTimers]);
 
-  // Programa el aviso y el logout automático a partir del token actual
+  // Aviso y el logout automático a partir del token actual
   const programarTimers = useCallback((token) => {
     cancelarTimers();
     const exp = jwtExp(token);
-    if (!exp) return; // token sin expiración (no aplica)
+    if (!exp) return; 
 
     const ahoraMs      = Date.now();
     const expMs        = exp * 1000;
@@ -76,20 +76,20 @@ export function AuthProvider({ children }) {
     if (msParaAviso > 0) {
       timerAvisoRef.current = setTimeout(() => setMostrarAviso(true), msParaAviso);
     } else {
-      // Queda menos de AVISO_SEGUNDOS, mostrar aviso de inmediato
+
       setMostrarAviso(true);
     }
 
     timerLogoutRef.current = setTimeout(() => limpiarSesion(), msParaLogout);
   }, [cancelarTimers, limpiarSesion]);
 
-  // Escucha el evento que lanza el interceptor de Axios cuando recibe 401
+  
   useEffect(() => {
     window.addEventListener('auth:expired', limpiarSesion);
     return () => window.removeEventListener('auth:expired', limpiarSesion);
   }, [limpiarSesion]);
 
-  // Al montar con sesión ya activa, programa los timers
+  
   useEffect(() => {
     if (!usuario) return;
     const token = localStorage.getItem('token');
