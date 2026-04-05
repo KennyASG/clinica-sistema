@@ -257,11 +257,23 @@ function FilaPaciente({ paciente: p, seleccionado, onClick }) {
 }
 
 function PanelPaciente({ detalle, cargando, onCerrar, onVerExpediente }) {
+  const innerCls = "w-72 shrink-0 bg-white border border-slate-100 rounded-2xl flex flex-col overflow-hidden";
+
   if (cargando || !detalle) {
     return (
-      <div className="w-72 shrink-0 bg-white border border-slate-100 rounded-2xl flex items-center justify-center">
-        <p className="text-sm text-slate-400">{cargando ? 'Cargando...' : ''}</p>
-      </div>
+      <>
+        {/* Desktop */}
+        <div className={`hidden md:flex ${innerCls} items-center justify-center`}>
+          <p className="text-sm text-slate-400">{cargando ? 'Cargando...' : ''}</p>
+        </div>
+        {/* Móvil */}
+        <div className="md:hidden fixed inset-0 z-40 flex flex-col justify-end">
+          <div className="absolute inset-0 bg-black/30" onClick={onCerrar} />
+          <div className="relative bg-white rounded-t-2xl px-6 py-10 flex items-center justify-center">
+            <p className="text-sm text-slate-400">{cargando ? 'Cargando...' : ''}</p>
+          </div>
+        </div>
+      </>
     );
   }
 
@@ -270,10 +282,9 @@ function PanelPaciente({ detalle, cargando, onCerrar, onVerExpediente }) {
   const sangre = exp?.tipoSangre;
   const sangreCls = SANGRE_COLORS[sangre] || 'bg-slate-100 text-slate-500 border-slate-200';
 
-  return (
-    <div className="w-72 shrink-0 bg-white border border-slate-100 rounded-2xl flex flex-col overflow-hidden">
-
-      {/* Header del panel */}
+  const contenido = (
+    <>
+      {/* Header */}
       <div className="bg-slate-800 px-5 py-5 relative overflow-hidden">
         <button
           onClick={onCerrar}
@@ -302,40 +313,30 @@ function PanelPaciente({ detalle, cargando, onCerrar, onVerExpediente }) {
 
       {/* Contenido scrollable */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
-
-        {/* Datos de contacto */}
         <SeccionPanel titulo="Datos" icono={<User className="w-3.5 h-3.5" />}>
           <FilaDetalle etiqueta="DPI" valor={detalle.dpi} mono />
           <FilaDetalle etiqueta="Teléfono" valor={detalle.telefono || '—'} />
           {detalle.correo && <FilaDetalle etiqueta="Correo" valor={detalle.correo} />}
         </SeccionPanel>
 
-        {/* Alergias */}
         {exp?.tieneAlergias && exp.alergias && (
-          <SeccionPanel
-            titulo="Alergias"
-            icono={<AlertTriangle className="w-3.5 h-3.5" />}
-            urgente
-          >
+          <SeccionPanel titulo="Alergias" icono={<AlertTriangle className="w-3.5 h-3.5" />} urgente>
             <p className="text-xs text-red-700 leading-relaxed">{exp.alergias}</p>
           </SeccionPanel>
         )}
 
-        {/* Enfermedades crónicas */}
         {exp?.enfermedadesCronicas && (
           <SeccionPanel titulo="Enf. crónicas" icono={<Heart className="w-3.5 h-3.5" />}>
             <p className="text-xs text-slate-600 leading-relaxed">{exp.enfermedadesCronicas}</p>
           </SeccionPanel>
         )}
 
-        {/* Medicamentos permanentes */}
         {exp?.medicamentosPermanentes && (
           <SeccionPanel titulo="Medicamentos" icono={<Pill className="w-3.5 h-3.5" />}>
             <p className="text-xs text-slate-600 leading-relaxed">{exp.medicamentosPermanentes}</p>
           </SeccionPanel>
         )}
 
-        {/* Sin datos relevantes */}
         {!exp?.tieneAlergias && !exp?.enfermedadesCronicas && !exp?.medicamentosPermanentes && (
           <p className="text-xs text-slate-400 text-center py-2">Sin antecedentes registrados</p>
         )}
@@ -351,8 +352,24 @@ function PanelPaciente({ detalle, cargando, onCerrar, onVerExpediente }) {
           <ChevronRight className="w-4 h-4" />
         </button>
       </div>
-    </div>
+    </>
   );
+
+  return (
+    <>
+      {/* Desktop — panel lateral */}
+      <div className={`hidden md:flex ${innerCls}`}>{contenido}</div>
+
+      {/* Móvil — bottom sheet */}
+      <div className="md:hidden fixed inset-0 z-40 flex flex-col justify-end">
+        <div className="absolute inset-0 bg-black/30" onClick={onCerrar} />
+        <div className="relative bg-white rounded-t-2xl flex flex-col max-h-[85vh] overflow-hidden">
+          {contenido}
+        </div>
+      </div>
+    </>
+  );
+
 }
 
 function SeccionPanel({ titulo, icono, urgente = false, children }) {
